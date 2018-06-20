@@ -6,14 +6,15 @@ import com.jme3.renderer.Camera; //default camera
 public class MinecraftCamera
 {
     private FlyByCamera gameCam; //camera instance variable
-
+    private Camera defaultCam;
     //constructor that takes in the default camera from main
-    public MinecraftCamera (Camera defaultCam)
+    public MinecraftCamera (Camera cam)
     {
+        defaultCam = cam;
         gameCam = new FlyByCamera(defaultCam); //turns default cam into fly cam
         gameCam.setEnabled(true);
-        moveSpeed(10000);
-        rotationSpeed(10);
+        moveSpeed(10000f);
+        rotationSpeed(10000f);
     }
 
     //allows the speed of movement to be changed
