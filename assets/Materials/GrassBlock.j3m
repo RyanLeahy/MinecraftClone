@@ -1,0 +1,7 @@
+Material GrassTexture : Common/MatDefs/Light/Lighting.j3md {
+     MaterialParameters {
+        SeparateTexCoord : false
+     }
+    AdditionalRenderState {
+    }
+}

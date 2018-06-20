@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="MinecraftClone">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/build/classes" />
+    </CLASSES>
+    <JAVADOC />
+    <NATIVE>
+      <root url="file://$PROJECT_DIR$" />
+    </NATIVE>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/src" />
+    </SOURCES>
+  </library>
+</component>
