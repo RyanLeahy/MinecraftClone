@@ -18,6 +18,7 @@ public class Physics
     
     public Physics(Main mainClass)
     {
+        myMain = mainClass;
         bulletAppState = new BulletAppState();
         myMain.addState(bulletAppState);
         

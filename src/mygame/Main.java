@@ -5,20 +5,20 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Node;
 import com.jme3.app.state.AppState; //for interface for the add and remove helper methods
+import com.jme3.input.controls.ActionListener;
 
 /**
  * This is the Main Class of your Game. You should only do initialization here.
  * Move your Logic into AppStates or Controls
  * @author normenhansen
  */
-public class Main extends SimpleApplication
+public class Main extends SimpleApplication implements ActionListener //for keyMapping to work
 {
     private static Main myApp;
     
     public static void main(String[] args)
     {
         myApp = new Main();
-        
         myApp.start();
     }
 
@@ -27,6 +27,7 @@ public class Main extends SimpleApplication
     {
         Physics gamePhysics = new Physics(myApp);
         MinecraftCamera gameCam = new MinecraftCamera(myApp, flyCam);
+        KeyMapping gameKeyMap = new KeyMapping(myApp);
         Spatial grassBlock = assetManager.loadModel("Models/GrassBlock/GrassBlock.j3o");
         rootNode.attachChild(grassBlock);
         rootNode.addLight(new MinecraftLight().getWorldLight());
@@ -68,7 +69,6 @@ public class Main extends SimpleApplication
         stateManager.detach(child);
     }
     
-    
     @Override
     public void simpleUpdate(float tpf)
     {
@@ -79,5 +79,11 @@ public class Main extends SimpleApplication
     public void simpleRender(RenderManager rm)
     {
         //TODO: add render code
+    }
+
+    @Override
+    public void onAction(String name, boolean isPressed, float tpf)
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
