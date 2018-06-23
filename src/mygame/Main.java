@@ -74,5 +74,6 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
     Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
     mat1.setColor("Color", ColorRGBA.Gray);
     floor.setMaterial(mat1);
+    gamePhysics.addCollision(floor, 0);
     return floor;
 }

@@ -56,6 +56,7 @@ public class Physics
         characterControl = new CharacterControl(playerShape, .05f);
         characterControl.setJumpSpeed(20);
         characterControl.setFallSpeed(30);
+        characterControl.setGravity(new Vector3f(0,-30f,0));
         setPlayerSpawn(0, 10, 0);
         bulletAppState.getPhysicsSpace().add(characterControl); //add it to the physics listener
     }
