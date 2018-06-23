@@ -130,11 +130,11 @@ public class Physics
         public void collision(PhysicsCollisionEvent event)
         {
             //This chunk of code checks if the character is touching something to be used to prevent infinite jumping
-            if (event.getNodeA() != null && event.getNodeA().getName().equals("characterControl"))
+            if (event.getObjectA() != null && ((Spatial)event.getObjectA().getUserObject()).getName().equals("characterControl"))
             {
                 characterCollision = true;
             }
-            else if (event.getNodeB() != null && event.getNodeB().getName().equals("characterControl"))
+            else if (event.getObjectB() != null && ((Spatial)event.getObjectB().getUserObject()).getName().equals("characterControl"))
             {
                 characterCollision = true;
             }
