@@ -35,6 +35,7 @@ public class KeyMapping
         addMap("Up", new KeyTrigger(KeyInput.KEY_W));
         addMap("Down", new KeyTrigger(KeyInput.KEY_S));
         addMap("Jump", new KeyTrigger(KeyInput.KEY_SPACE));
+        addMap("Crouch", new KeyTrigger(KeyInput.KEY_LSHIFT));
     }
     
     /**
