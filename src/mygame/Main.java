@@ -3,18 +3,25 @@ package mygame;
 import com.jme3.app.SimpleApplication;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.Node;
-import com.jme3.app.state.AppState; //for interface for the add and remove helper methods
 import com.jme3.input.controls.ActionListener;
+import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.shape.Box;
 
 /**
- * This is the Main Class of your Game. You should only do initialization here.
- * Move your Logic into AppStates or Controls
- * @author normenhansen
+ * The Main class initializes and offers methods to help other classes use and add to the game
+ * None of the work is done in this class all of it is passed off to other appropriate classes
+ * 
+ * @author Ryan Leahy
  */
 public class Main extends SimpleApplication implements ActionListener //for keyMapping to work
 {
     private static Main myApp;
+    private Physics gamePhysics;
+    private MinecraftCamera gameCam;
+    private KeyMapping gameKeyMap;
+    private MinecraftSky gameSky;
     
     public static void main(String[] args)
     {
@@ -25,54 +32,28 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
     @Override
     public void simpleInitApp()
     {
-        Physics gamePhysics = new Physics(myApp);
-        MinecraftCamera gameCam = new MinecraftCamera(myApp, flyCam);
-        KeyMapping gameKeyMap = new KeyMapping(myApp);
+        gameCam = new MinecraftCamera(myApp, cam);
+        gameKeyMap = new KeyMapping(myApp);
+        gameSky = new MinecraftSky(myApp);
+        gamePhysics = new Physics(myApp);
         Spatial grassBlock = assetManager.loadModel("Models/GrassBlock/GrassBlock.j3o");
+        gamePhysics.addCollision(grassBlock, 0);
+        grassBlock.center();
         rootNode.attachChild(grassBlock);
+        rootNode.attachChild(makeFloor());
         rootNode.addLight(new MinecraftLight().getWorldLight());
     }
     
-    /**
-     * adds a node to rootNode 
-     * @param childNode
-     */
-    public void addNode(Node childNode)
+    //passes instance of minecraftCamClass MAY IMPLEMENT DIFFERENTLY LATER
+    public MinecraftCamera getMinecraftCam()
     {
-        rootNode.attachChild(childNode);
-    }
-
-    /**
-     * removes a node from rootNode
-     * @param childNode 
-     */
-    public void removeNode(Node childNode)
-    {
-        rootNode.detachChild(childNode);
-    }
-    
-    /**
-     * adds a state to stateManager
-     * @param child 
-     */
-    public void addState(AppState child)
-    {
-        stateManager.attach(child);
-    }
-    
-    /**
-     * removes a state from stateManager
-     * @param child 
-     */
-    public void removeState(AppState child)
-    {
-        stateManager.detach(child);
+        return gameCam;
     }
     
     @Override
     public void simpleUpdate(float tpf)
     {
-        //TODO: add update code
+        gamePhysics.simpleUpdate(tpf);
     }
 
     @Override
@@ -84,6 +65,14 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
     @Override
     public void onAction(String name, boolean isPressed, float tpf)
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        gamePhysics.onAction(name, isPressed, tpf); //pass off the action to the physics class
     }
+    protected Geometry makeFloor() {
+    Box box = new Box(15, .2f, 15);
+    Geometry floor = new Geometry("the Floor", box);
+    floor.setLocalTranslation(0, -4, -5);
+    Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    mat1.setColor("Color", ColorRGBA.Gray);
+    floor.setMaterial(mat1);
+    return floor;
 }

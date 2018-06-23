@@ -22,6 +22,7 @@ public class KeyMapping
     {
         myMain = mainClass;
         inputManager = myMain.getInputManager();
+        defaultMap();
     }
     
     /*
