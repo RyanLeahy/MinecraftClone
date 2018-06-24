@@ -37,7 +37,7 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
         gameSky = new MinecraftSky(myApp);
         gamePhysics = new Physics(myApp);
         Spatial grassBlock = assetManager.loadModel("Models/GrassBlock/GrassBlock.j3o");
-        gamePhysics.addCollision(grassBlock, 0);
+        gamePhysics.addCollision(grassBlock, 1f);
         grassBlock.center();
         rootNode.attachChild(grassBlock);
         rootNode.attachChild(makeFloor());
@@ -68,7 +68,7 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
         gamePhysics.onAction(name, isPressed, tpf); //pass off the action to the physics class
     }
     protected Geometry makeFloor() {
-    Box box = new Box(15, .2f, 15);
+    Box box = new Box(15, 2, 15);
     Geometry floor = new Geometry("the Floor", box);
     floor.setLocalTranslation(0, -4, -5);
     Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
