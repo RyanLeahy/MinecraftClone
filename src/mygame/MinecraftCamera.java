@@ -20,7 +20,7 @@ public class MinecraftCamera
     //allows the speed of movement to be changed
     public void moveSpeed(float speed)
     {
-        //gameCam.setMoveSpeed(speed);
+        //gameCam.setMoveSpeed(speed); 
     }
 
     //alows the speed of rotation to be changed
