@@ -38,10 +38,13 @@ public class Physics implements PhysicsCollisionListener
     
    
     private boolean characterCollision; //this is true if the player is touching something, helps for limiting jumping
+    private boolean fallCollision; 
     
     private boolean[] keyPress; //boolean array to store if keys are pressed or not
     private enum Keys {LEFT, RIGHT, UP, DOWN, CROUCH}; //enumeration for indexing the array
     private int debugTrack = 0; //used as a counter to show in debug prints that something is occurring 
+    
+    private Spatial currentModel;
     
     public Physics(Main mainClass)
     {
@@ -58,13 +61,13 @@ public class Physics implements PhysicsCollisionListener
     
     /**
      * Method takes in a spatial and adds all the necessary things to make it so you can't just walk through it
-     * @param Spatial model
-     * @param float gravityValue
-     * @param boolean checkCollision
+     * @param model
+     * @param gravityValue
      */
     public void addCollision(Spatial model, float gravityValue)
     {
         CollisionShape modelShape;
+        currentModel = model;
         
         //if the item is not suppose to move
         if (gravityValue == 0)
@@ -73,16 +76,35 @@ public class Physics implements PhysicsCollisionListener
             modelShape = CollisionShapeFactory.createDynamicMeshShape(model); //otherwise create a dynamic mesh shape, better suited for movable objects
         
         rigidBodyControl = new RigidBodyControl(modelShape, gravityValue); //gives hitbox and amount of weight to this
-        model.addControl(rigidBodyControl); //add the hitbox and weight to the model
+        currentModel.addControl(rigidBodyControl); //add the hitbox and weight to the model
         
         //if the item is not suppose to move, have to check it again because the above if statement can't hold these in it because it relies on the subsequent lines, thats why were doing this agains
         if (gravityValue == 0)
-            model.getControl(RigidBodyControl.class).setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_02); //sets group to collision group 2, the group who ignores collisions
+            currentModel.getControl(RigidBodyControl.class).setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_02); //sets group to collision group 2, the group who ignores collisions
         else
-            model.getControl(RigidBodyControl.class).setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_01); //sets group to collision group 1, the group who checks collision
+        {
+            currentModel.getControl(RigidBodyControl.class).setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_01); //sets group to collision group 1, the group who checks collision
+            currentModel.getControl(RigidBodyControl.class).setKinematic(true);
+        }
         
         rigidBodyControl.setGravity(new Vector3f(0,-30f,0));
         bulletAppState.getPhysicsSpace().add(model); //add it to the physics listener
+    }
+    
+    //Method implements own version of falling since the library was lacking on that, this should be called somehow when things that are suppose to fall are no longer in contact with an object, figure that out
+    private void fall()
+    {
+        
+    }
+    
+    /**
+     * Sets the coordinate location of the object passed to the addCollision method
+     * @param model
+     * @param coordinates 
+     */
+    public void setLocation(Spatial model, Vector3f coordinates)
+    {
+        model.getControl(RigidBodyControl.class).setPhysicsLocation(coordinates);
     }
     
     private void setupPlayer()
@@ -97,7 +119,7 @@ public class Physics implements PhysicsCollisionListener
         characterControl.setGravity(new Vector3f(0,-30f,0));
         characterControl.setSpatial(playerSpatial);
         playerSpatial.addControl(characterControl); //add the controller to the spatial
-        setPlayerSpawn(5, -5, 5);
+        setPlayerSpawn(new Vector3f(5, -5, 5));
 
         //this helps makes collision events more efficient by only calculating the ones that involve the player
         playerSpatial.getControl(CharacterControl.class).setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_01); //assign it to collision group 1
@@ -107,9 +129,13 @@ public class Physics implements PhysicsCollisionListener
         //myMain.getRootNode().attachChild(playerSpatial); this line will render the spatial which isn't necessary right now and also the spatial doesnt have a material so it will cause a runtime error
     }
     
-    public void setPlayerSpawn(float x, float y, float z)
+    /**
+     * method sets the location of where the player spawns in game
+     * @param coordinates 
+     */
+    public void setPlayerSpawn(Vector3f coordinates)
     {
-        characterControl.setPhysicsLocation(new Vector3f(x,y,z));
+        characterControl.setPhysicsLocation(coordinates);
     }
     
     //This method handles what happens when a button is clicked, usually setting a boolean to true indicating a key was pressed
@@ -158,6 +184,8 @@ public class Physics implements PhysicsCollisionListener
         walkDirection.setY(0); //this makes it so pointing at the sky doesn't actually move the character into the sky, the only way that the player should raise in Y is by jumping
         characterControl.setWalkDirection(walkDirection);
         myMain.getMinecraftCam().getCam().setLocation(characterControl.getPhysicsLocation());
+        
+        fall();
     }
     
     //method responds to a collision event and performs a specified action

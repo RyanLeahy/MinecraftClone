@@ -41,7 +41,7 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
         gameGui = new GUI(myApp);
         
         Spatial grassBlock = assetManager.loadModel("Models/GrassBlock/GrassBlock.j3o");
-        gamePhysics.addCollision(grassBlock, 1000);
+        gamePhysics.addCollision(grassBlock, 1f);
         grassBlock.center();
         rootNode.attachChild(grassBlock);
         rootNode.attachChild(makeFloor());

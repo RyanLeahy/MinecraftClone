@@ -1,5 +1,6 @@
 package mygame;
 
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
 /**
@@ -10,17 +11,28 @@ public class Block
     private int blockId;
     private String blockName;
     private Spatial blockModel;
+    private Physics gamePhysics;
+    private float blockGravity;
+    private Vector3f blockCoordinate;
 
     /**
      *
-     * @parameter int id, string name, Spatial model
+     * @param id
+     * @param name 
+     * @param model
+     * @param physicsClass
+     * @param gravityValue
+     * @param coordinates
      * make sure to use asset manager to pass the model
      */
-    public Block (int id, String name, Spatial model)
+    public Block (int id, String name, Spatial model, Physics physicsClass, float gravityValue, Vector3f coordinates)
     {
         blockId = id;
         blockName = name;
         blockModel = model;
+        gamePhysics = physicsClass;
+        blockGravity = gravityValue;
+        blockCoordinate = coordinates;
     }
 
     /**
@@ -49,6 +61,15 @@ public class Block
     {
         return blockModel;
     }
+    
+    /**
+     * passes back blockCoordinate
+     * @return Vector3f
+     */
+    public Vector3f getBlockCoordinate()
+    {
+        return blockCoordinate;
+    }
 
     /**
      * Sets the blockId contained in the object
@@ -75,5 +96,11 @@ public class Block
     public void setBlockModel(Spatial blockModel)
     {
         this.blockModel = blockModel;
+    }
+    
+    public void setBlockCoordinate(Vector3f coordinates)
+    {
+        this.blockCoordinate = coordinates;
+        gamePhysics.setLocation(getBlockModel(), coordinates); 
     }
 }
