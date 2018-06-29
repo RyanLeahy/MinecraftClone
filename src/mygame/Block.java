@@ -12,27 +12,32 @@ public class Block
     private String blockName;
     private Spatial blockModel;
     private Physics gamePhysics;
+    private Main myMain;
     private float blockGravity;
     private Vector3f blockCoordinate;
 
     /**
-     *
+     * Block constructor handles creating the blocks in the game
+     * 
      * @param id
      * @param name 
      * @param model
      * @param physicsClass
+     * @param mainClass
      * @param gravityValue
      * @param coordinates
      * make sure to use asset manager to pass the model
      */
-    public Block (int id, String name, Spatial model, Physics physicsClass, float gravityValue, Vector3f coordinates)
+    public Block (int id, String name, Spatial model, Physics physicsClass, Main mainClass, float gravityValue, Vector3f coordinates)
     {
         blockId = id;
         blockName = name;
         blockModel = model;
         gamePhysics = physicsClass;
+        myMain = mainClass;
         blockGravity = gravityValue;
         blockCoordinate = coordinates;
+        registerBlock();
     }
 
     /**
@@ -70,37 +75,11 @@ public class Block
     {
         return blockCoordinate;
     }
-
-    /**
-     * Sets the blockId contained in the object
-     * @param int
-     */
-    public void setBlockId(int blockId)
-    {
-        this.blockId = blockId;
-    }
-
-    /**
-     * sets the blockName contained in the object
-     * @param String
-     */
-    public void setBlockName(String blockName)
-    {
-        this.blockName = blockName;
-    }
-
-    /**
-     * sets the blockModel contained in the object
-     * @param Spatial
-     */
-    public void setBlockModel(Spatial blockModel)
-    {
-        this.blockModel = blockModel;
-    }
     
-    public void setBlockCoordinate(Vector3f coordinates)
+    private void registerBlock()
     {
-        this.blockCoordinate = coordinates;
-        gamePhysics.setLocation(getBlockModel(), coordinates); 
+        gamePhysics.addCollision(blockModel, blockGravity);
+        gamePhysics.setLocation(blockModel, blockCoordinate);
+        myMain.getRootNode().attachChild(blockModel);
     }
 }

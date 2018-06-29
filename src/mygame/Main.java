@@ -2,10 +2,10 @@ package mygame;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.renderer.RenderManager;
-import com.jme3.scene.Spatial;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
@@ -24,6 +24,8 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
     private KeyMapping gameKeyMap;
     private MinecraftSky gameSky;
     private GUI gameGui;
+    private BlockDatabase gameDatabase;
+    private int debug, debug2;
     
     public static void main(String[] args)
     {
@@ -39,15 +41,19 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
         gameSky = new MinecraftSky(myApp);
         gamePhysics = new Physics(myApp);
         gameGui = new GUI(myApp);
+        gameDatabase = new BlockDatabase(myApp);
         
-        Spatial grassBlock = assetManager.loadModel("Models/GrassBlock/GrassBlock.j3o");
-        gamePhysics.addCollision(grassBlock, 1f);
-        grassBlock.center();
-        rootNode.attachChild(grassBlock);
         rootNode.attachChild(makeFloor());
         rootNode.addLight(new MinecraftLight().getWorldLight());
+        debug = 0;
+        debug2 = 0;
     }
     
+    /**
+     * Method returns the AppSettings of the game
+     * 
+     * @return settings 
+     */
     public AppSettings getSettings()
     {
         return settings;
@@ -59,10 +65,27 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
         return gameCam;
     }
     
+    /**
+     * Method returns the physics engine of the game
+     * 
+     * @return gamePhysics
+     */
+    public Physics getGamePhysics()
+    {
+        return gamePhysics;
+    }
+    
     @Override
     public void simpleUpdate(float tpf)
     {
         gamePhysics.simpleUpdate(tpf);
+        
+        debug2++;
+        if(debug2 % 100 == 0)
+        {
+            debug += 2;
+            gameDatabase.createBlock(1, new Vector3f(debug, -7, 1));
+        }
     }
 
     @Override
@@ -76,14 +99,17 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
     {
         gamePhysics.onAction(name, isPressed, tpf); //pass off the action to the physics class
     }
-    protected Geometry makeFloor() {
-    Box box = new Box(15, 2, 15);
-    Geometry floor = new Geometry("the Floor", box);
-    floor.setLocalTranslation(0, -10, -5);
-    Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-    mat1.setColor("Color", ColorRGBA.Gray);
-    floor.setMaterial(mat1);
-    gamePhysics.addCollision(floor, 0);
-    return floor;
+    
+    protected Geometry makeFloor() 
+    {
+        Box box = new Box(15, 2, 15);
+        Geometry floor = new Geometry("the Floor", box);
+        floor.setLocalTranslation(0, -10, -5);
+        Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat1.setColor("Color", ColorRGBA.Gray);
+        floor.setMaterial(mat1);
+        gamePhysics.addCollision(floor, 0);
+        return floor;
+    }
 }
     
