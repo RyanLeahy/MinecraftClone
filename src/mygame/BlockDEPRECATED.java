@@ -2,11 +2,12 @@ package mygame;
 
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
+import com.cubes.*;
 
 /**
  * Class holds identifying information for blocks that will be placed in the game, an id, a name, and the model
  */
-public class Block
+public class BlockDEPRECATED
 {
     private int blockId;
     private String blockName;
@@ -28,7 +29,7 @@ public class Block
      * @param coordinates
      * make sure to use asset manager to pass the model
      */
-    public Block (int id, String name, Spatial model, Physics physicsClass, Main mainClass, float gravityValue, Vector3f coordinates)
+    public BlockDEPRECATED (int id, String name, Spatial model, Physics physicsClass, Main mainClass, float gravityValue, Vector3f coordinates)
     {
         blockId = id;
         blockName = name;

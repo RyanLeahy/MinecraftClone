@@ -1,5 +1,6 @@
 package mygame;
 
+import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.renderer.RenderManager;
 import com.jme3.input.controls.ActionListener;
@@ -16,7 +17,7 @@ import com.jme3.system.AppSettings;
  * 
  * @author Ryan Leahy
  */
-public class Main extends SimpleApplication implements ActionListener //for keyMapping to work
+public class Main extends SimpleApplication implements ActionListener, Application //for keyMapping to work
 {
     private static Main myApp;
     private Physics gamePhysics;
@@ -25,7 +26,8 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
     private MinecraftSky gameSky;
     private GUI gameGui;
     private BlockDatabase gameDatabase;
-    private int debug, debug2;
+    private WorldGenerator gameWorldGen;
+    private Application application;
     
     public static void main(String[] args)
     {
@@ -42,11 +44,10 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
         gamePhysics = new Physics(myApp);
         gameGui = new GUI(myApp);
         gameDatabase = new BlockDatabase(myApp);
+        gameWorldGen = new WorldGenerator(myApp, gameDatabase);
         
         rootNode.attachChild(makeFloor());
         rootNode.addLight(new MinecraftLight().getWorldLight());
-        debug = 0;
-        debug2 = 0;
     }
     
     /**
@@ -75,17 +76,15 @@ public class Main extends SimpleApplication implements ActionListener //for keyM
         return gamePhysics;
     }
     
+    public Application getApplication()
+    {
+        return application;
+    }
+    
     @Override
     public void simpleUpdate(float tpf)
     {
         gamePhysics.simpleUpdate(tpf);
-        
-        debug2++;
-        if(debug2 % 100 == 0)
-        {
-            debug += 2;
-            gameDatabase.createBlock(1, new Vector3f(debug, -7, 1));
-        }
     }
 
     @Override

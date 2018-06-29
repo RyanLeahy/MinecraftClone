@@ -5,6 +5,12 @@
  */
 package mygame;
 
+import com.cubes.Block;
+import com.cubes.BlockManager;
+import com.cubes.BlockSkin;
+import com.cubes.BlockSkin_TextureLocation;
+import com.cubes.CubesSettings;
+import com.jme3.app.Application;
 import com.jme3.math.Vector3f;
 
 /**
@@ -14,10 +20,17 @@ import com.jme3.math.Vector3f;
 public class BlockDatabase
 {
     private Main myMain;
+    private CubesSettings settings;
     
     public BlockDatabase(Main mainClass)
     {
         myMain = mainClass;
+        settings = new CubesSettings(myMain);
+    }
+    
+    private void initiateSettings()
+    {
+        settings.setDefaultBlockMaterial("assets/Textures/textureatlas.png");
     }
     
     /**
@@ -36,7 +49,15 @@ public class BlockDatabase
     
     private void createGrass(Vector3f coordinates)
     {
-        new Block(1, "Grass", myMain.getAssetManager().loadModel("Models/GrassBlock/GrassBlock.j3o"), myMain.getGamePhysics(), myMain, 0f, coordinates);
+        //new Block(1, "Grass", myMain.getAssetManager().loadModel("Models/GrassBlock/GrassBlock.j3o"), myMain.getGamePhysics(), myMain, 0f, coordinates);
+        BlockManager.register(new Block(new BlockSkin[]{
+            new BlockSkin(new BlockSkin_TextureLocation(0,1), false),
+            new BlockSkin(new BlockSkin_TextureLocation(0,2), false),
+            new BlockSkin(new BlockSkin_TextureLocation(0,0), false),
+            new BlockSkin(new BlockSkin_TextureLocation(0,0), false),
+            new BlockSkin(new BlockSkin_TextureLocation(0,0), false),
+            new BlockSkin(new BlockSkin_TextureLocation(0,0), false)
+        }));
     }
 }
 

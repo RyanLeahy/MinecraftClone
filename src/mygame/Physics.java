@@ -56,7 +56,8 @@ public class Physics implements PhysicsCollisionListener
         //myMain.getRootNode().attachChild(physicsNode);
         bulletAppState.getPhysicsSpace().addCollisionListener(this); //wrote implementation of interface below
         setupPlayer();
-        bulletAppState.setDebugEnabled(true);
+        
+        bulletAppState.setDebugEnabled(false);
     }
     
     /**
