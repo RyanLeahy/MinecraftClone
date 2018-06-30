@@ -46,7 +46,6 @@ public class Main extends SimpleApplication implements ActionListener, Applicati
         gameDatabase = new BlockDatabase(myApp);
         gameWorldGen = new WorldGenerator(myApp, gameDatabase);
         
-        rootNode.attachChild(makeFloor());
         rootNode.addLight(new MinecraftLight().getWorldLight());
     }
     
@@ -97,18 +96,6 @@ public class Main extends SimpleApplication implements ActionListener, Applicati
     public void onAction(String name, boolean isPressed, float tpf)
     {
         gamePhysics.onAction(name, isPressed, tpf); //pass off the action to the physics class
-    }
-    
-    protected Geometry makeFloor() 
-    {
-        Box box = new Box(15, 2, 15);
-        Geometry floor = new Geometry("the Floor", box);
-        floor.setLocalTranslation(0, -10, -5);
-        Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat1.setColor("Color", ColorRGBA.Gray);
-        floor.setMaterial(mat1);
-        gamePhysics.addCollision(floor, 0);
-        return floor;
     }
 }
     

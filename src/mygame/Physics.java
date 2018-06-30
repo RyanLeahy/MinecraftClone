@@ -9,7 +9,6 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
-import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -60,11 +59,11 @@ public class Physics implements PhysicsCollisionListener
         bulletAppState.setDebugEnabled(false);
     }
     
-    /**
+    /* DEPRECATED FOR NOW
      * Method takes in a spatial and adds all the necessary things to make it so you can't just walk through it
      * @param model
      * @param gravityValue
-     */
+     *
     public void addCollision(Spatial model, float gravityValue)
     {
         CollisionShape modelShape;
@@ -90,6 +89,11 @@ public class Physics implements PhysicsCollisionListener
         
         rigidBodyControl.setGravity(new Vector3f(0,-30f,0));
         bulletAppState.getPhysicsSpace().add(model); //add it to the physics listener
+    }*/
+    
+    public BulletAppState getBulletAppState()
+    {
+        return bulletAppState;
     }
     
     //Method implements own version of falling since the library was lacking on that, this should be called somehow when things that are suppose to fall are no longer in contact with an object, figure that out
@@ -110,9 +114,9 @@ public class Physics implements PhysicsCollisionListener
     
     private void setupPlayer()
     {
-        Box box = new Box(2, 2, 2); 
+        Box box = new Box(1, 2, 1); 
         Geometry playerSpatial = new Geometry("player", box); //collision wouldn't detect just the collision mesh so I had to give it a spatial for it to detect
-        CapsuleCollisionShape playerShape = new CapsuleCollisionShape(2f, 2f, 1); //creates the invisible field, 2 wide, 6 tall, 1 means standing up
+        CollisionShape playerShape = CollisionShapeFactory.createMeshShape(playerSpatial); //creates the invisible field, 2 wide, 2 tall, 1 means standing up
         characterControl = new CharacterControl(playerShape, .05f);
         
         characterControl.setJumpSpeed(20);
@@ -120,7 +124,9 @@ public class Physics implements PhysicsCollisionListener
         characterControl.setGravity(new Vector3f(0,-30f,0));
         characterControl.setSpatial(playerSpatial);
         playerSpatial.addControl(characterControl); //add the controller to the spatial
-        setPlayerSpawn(new Vector3f(5, -5, 5));
+        
+        
+        setPlayerSpawn(new Vector3f(0, 258, 0));
 
         //this helps makes collision events more efficient by only calculating the ones that involve the player
         playerSpatial.getControl(CharacterControl.class).setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_01); //assign it to collision group 1
@@ -185,8 +191,6 @@ public class Physics implements PhysicsCollisionListener
         walkDirection.setY(0); //this makes it so pointing at the sky doesn't actually move the character into the sky, the only way that the player should raise in Y is by jumping
         characterControl.setWalkDirection(walkDirection);
         myMain.getMinecraftCam().getCam().setLocation(characterControl.getPhysicsLocation());
-        
-        fall();
     }
     
     //method responds to a collision event and performs a specified action
