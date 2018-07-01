@@ -41,6 +41,7 @@ public class KeyMapping
         addMap("Crouch", new KeyTrigger(KeyInput.KEY_LSHIFT));
         addMap("Break", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         addMap("Place", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+        addMap("SelectBlock", new MouseButtonTrigger(MouseInput.BUTTON_MIDDLE));
     }
     
     /**

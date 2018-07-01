@@ -74,6 +74,22 @@ public class BlockDatabase
        return registeredBlocks[id];
     }
     
+    public int searchDatabase(Block search)
+    {
+        int id = -1;
+        
+        for(int i = 0; i < MAX_BLOCKS; i++)
+        {
+            if (registeredBlocks[i] != null && registeredBlocks[i].equals(search))
+            {
+                id = i;
+                i = MAX_BLOCKS;
+            }
+        }
+        
+        return id;
+    }
+    
     private Block createGrass()
     {
         if(registeredBlocks[2] == null)

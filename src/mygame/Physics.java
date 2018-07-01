@@ -49,7 +49,7 @@ public class Physics implements PhysicsCollisionListener
     
     //key handling instance variables
     private boolean[] keyPress; //boolean array to store if keys are pressed or not
-    private enum Keys {LEFT, RIGHT, UP, DOWN, CROUCH, BREAK, PLACE}; //enumeration for indexing the array
+    private enum Keys {LEFT, RIGHT, UP, DOWN, CROUCH, BREAK, PLACE, SELECT_BLOCK}; //enumeration for indexing the array
     
     private int debugTrack = 0; //used as a counter to show in debug prints that something is occurring 
     
@@ -187,10 +187,13 @@ public class Physics implements PhysicsCollisionListener
                 if (characterCollision && isPressed) {characterControl.jump(new Vector3f(0, 10f, 0));} else { characterCollision = false; } //if key is pressed and the character is touching an object
                 break;
             case "Break":
-                if (isPressed) { keyPress[Keys.BREAK.ordinal()] = true; breakBlock(); } else { keyPress[Keys.BREAK.ordinal()] = false; }
+                if (isPressed) { keyPress[Keys.BREAK.ordinal()] = true; myMain.getWorldGenerator().removeBlock(new CollisionResults()); } else { keyPress[Keys.BREAK.ordinal()] = false; }
                 break;
             case "Place":
-                if (isPressed) { keyPress[Keys.PLACE.ordinal()] = true; } else { keyPress[Keys.PLACE.ordinal()] = false; }
+                if (isPressed) { keyPress[Keys.PLACE.ordinal()] = true; myMain.getWorldGenerator().addBlock(new CollisionResults()); } else { keyPress[Keys.PLACE.ordinal()] = false; }
+                break;
+            case "SelectBlock":    
+                if (isPressed) { keyPress[Keys.SELECT_BLOCK.ordinal()] = true; myMain.getWorldGenerator().selectBlock(new CollisionResults()); } else { keyPress[Keys.SELECT_BLOCK.ordinal()] = false; }
                 break;
             default:
                 break;
@@ -235,19 +238,6 @@ public class Physics implements PhysicsCollisionListener
         //this handles what happens when the player falls out of the world and at what y value it occurs
         if(characterControl.getPhysicsLocation().getY() < -50)
             below0();
-    }
-    
-    private void breakBlock()
-    {
-        collisionResults = new CollisionResults();
-        ray = new Ray(myMain.getMinecraftCam().getCam().getLocation(), myMain.getMinecraftCam().getCam().getDirection());
-        myMain.getWorldGenerator().getWorldNode().collideWith(ray, collisionResults);
-        if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
-        {
-            Vector3f tempTranslation = collisionResults.getClosestCollision().getContactPoint();
-            collisionPoint = new Vector3Int((int)tempTranslation.getX(), (int)tempTranslation.getY(), (int)tempTranslation.getZ());
-            myMain.getWorldGenerator().removeBlock(collisionPoint);
-        }
     }
     
     //method responds to a collision event and performs a specified action

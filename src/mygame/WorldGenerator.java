@@ -11,6 +11,9 @@ import com.cubes.BlockTerrainControl;
 import com.cubes.Vector3Int;
 import com.jme3.bullet.collision.shapes.MeshCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.collision.CollisionResults;
+import com.jme3.math.Ray;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 
@@ -24,6 +27,7 @@ public class WorldGenerator implements BlockChunkListener
     private BlockDatabase myDatabase;
     private BlockTerrainControl world;
     private Node terrainNode;
+    private int currentID;
     
     public WorldGenerator(Main mainClass, BlockDatabase databaseClass)
     {
@@ -45,6 +49,13 @@ public class WorldGenerator implements BlockChunkListener
         world.setBlockArea(new Vector3Int(0, 1, 0), new Vector3Int(64, 50, 64), myDatabase.createBlock(1)); //stone
         world.setBlockArea(new Vector3Int(0, 0, 0), new Vector3Int(64, 1, 64), myDatabase.createBlock(7)); //bedrock
         generateTree(new Vector3Int(8, 61, 8), world);
+        generateTree(new Vector3Int(16, 61, 16), world);
+        
+        
+        for(int i = 0; i < 65; i++)
+            if(myDatabase.createBlock(i) != null)
+                world.setBlock(new Vector3Int(i, 61, 32), myDatabase.createBlock(i));
+        
         
         terrainNode.addControl(world);
         terrainNode.addControl(new RigidBodyControl(0));
@@ -90,11 +101,62 @@ public class WorldGenerator implements BlockChunkListener
     
     /**
      * Method removes a block at a given coordinate
-     * @param coordinates 
+     * 
+     * @param collisionResults
      */
-    public void removeBlock(Vector3Int coordinates)
+    public void removeBlock(CollisionResults collisionResults)
     {
-        world.removeBlock(coordinates);
+        Ray ray = new Ray(myMain.getMinecraftCam().getCam().getLocation(), myMain.getMinecraftCam().getCam().getDirection());
+        terrainNode.collideWith(ray, collisionResults);
+        if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
+        {
+            Vector3f tempTranslation = collisionResults.getClosestCollision().getContactPoint();
+            Vector3Int collisionPoint = new Vector3Int((int)tempTranslation.getX(), (int)tempTranslation.getY(), (int)tempTranslation.getZ());
+            world.removeBlock(collisionPoint);
+        }
+    }
+    
+    public void addBlock(CollisionResults collisionResults)
+    {
+        Ray ray = new Ray(myMain.getMinecraftCam().getCam().getLocation(), myMain.getMinecraftCam().getCam().getDirection());
+        terrainNode.collideWith(ray, collisionResults);
+        if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
+        {
+            Vector3f tempTranslation = collisionResults.getClosestCollision().getContactPoint();
+            Vector3Int collisionPoint = new Vector3Int((int)tempTranslation.getX(), (int)tempTranslation.getY(), (int)tempTranslation.getZ());
+            if (currentID != -1) //if the search didn't fail use that block
+                world.setBlock(collisionPoint, myDatabase.createBlock(currentID));
+            else //otherwise use stone
+                world.setBlock(collisionPoint, myDatabase.createBlock(1)); 
+        }
+    }
+    
+    /**
+     * Method finds the id of the block and returns it 
+     * 
+     * @param collisionResults
+     */
+    public void selectBlock(CollisionResults collisionResults)
+    {
+        Ray ray = new Ray(myMain.getMinecraftCam().getCam().getLocation(), myMain.getMinecraftCam().getCam().getDirection());
+        terrainNode.collideWith(ray, collisionResults);
+        if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
+        {
+            Vector3f tempTranslation = collisionResults.getClosestCollision().getContactPoint();
+            Vector3Int collisionPoint = new Vector3Int((int)tempTranslation.getX(), (int)tempTranslation.getY(), (int)tempTranslation.getZ());
+            currentID = myDatabase.searchDatabase(world.getBlock(collisionPoint));
+        }
+    }
+    
+    /**
+     * Method adds a block at a given coordinate
+     * 
+     * @param coordinates
+     * @param id
+     */
+    public void addBlock(Vector3Int coordinates, int id)
+    {
+        world.setBlock(coordinates, myDatabase.createBlock(id));
     }
     
     @Override
