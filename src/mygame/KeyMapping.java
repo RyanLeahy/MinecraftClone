@@ -7,7 +7,10 @@ package mygame;
 
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.input.controls.Trigger;
 
 /**
  *
@@ -36,14 +39,17 @@ public class KeyMapping
         addMap("Down", new KeyTrigger(KeyInput.KEY_S));
         addMap("Jump", new KeyTrigger(KeyInput.KEY_SPACE));
         addMap("Crouch", new KeyTrigger(KeyInput.KEY_LSHIFT));
+        addMap("Break", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        addMap("Place", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
     }
     
     /**
      * This method is for adding mapping
      * 
-     * @param String inputName, KeyTrigger inputKey
+     * @param inputName
+     * @param inputKey
      */
-    public void addMap(String inputName, KeyTrigger inputKey)
+    public void addMap(String inputName, Trigger inputKey)
     {
         inputManager.addMapping(inputName, inputKey);
         inputManager.addListener(myMain, inputName);
@@ -52,7 +58,7 @@ public class KeyMapping
     /**
      * This method is for reMapping already set keys
      */
-    public void reMap(String inputName, KeyTrigger inputKey)
+    public void reMap(String inputName, Trigger inputKey)
     {
         inputManager.deleteMapping(inputName);
         inputManager.addMapping(inputName, inputKey);

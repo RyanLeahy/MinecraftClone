@@ -23,11 +23,13 @@ public class WorldGenerator implements BlockChunkListener
     private Main myMain;
     private BlockDatabase myDatabase;
     private BlockTerrainControl world;
+    private Node terrainNode;
     
     public WorldGenerator(Main mainClass, BlockDatabase databaseClass)
     {
         myMain = mainClass;
         myDatabase = databaseClass;
+        terrainNode = new Node();
         initiateWorld();
     }
     
@@ -35,16 +37,15 @@ public class WorldGenerator implements BlockChunkListener
     private void initiateWorld()
     {
         //this line creates a single chunk
-        world = new BlockTerrainControl(myDatabase.getSettings(), new Vector3Int(1, 1, 1));
+        world = new BlockTerrainControl(myDatabase.getSettings(), new Vector3Int(4, 1, 4));
         
-        //basic chunk for testing purposes
-        world.setBlockArea(new Vector3Int(0, 60, 0), new Vector3Int(16, 1, 16), myDatabase.createBlock(2)); //grass
-        world.setBlockArea(new Vector3Int(0, 50, 0), new Vector3Int(16, 10, 16), myDatabase.createBlock(3)); //dirt
-        world.setBlockArea(new Vector3Int(0, 1, 0), new Vector3Int(16, 50, 16), myDatabase.createBlock(1)); //stone
-        world.setBlockArea(new Vector3Int(0, 0, 0), new Vector3Int(16, 1, 16), myDatabase.createBlock(7)); //bedrock
+        //basic world for testing purposes
+        world.setBlockArea(new Vector3Int(0, 60, 0), new Vector3Int(64, 1, 64), myDatabase.createBlock(2)); //grass
+        world.setBlockArea(new Vector3Int(0, 50, 0), new Vector3Int(64, 10, 64), myDatabase.createBlock(3)); //dirt
+        world.setBlockArea(new Vector3Int(0, 1, 0), new Vector3Int(64, 50, 64), myDatabase.createBlock(1)); //stone
+        world.setBlockArea(new Vector3Int(0, 0, 0), new Vector3Int(64, 1, 64), myDatabase.createBlock(7)); //bedrock
         generateTree(new Vector3Int(8, 61, 8), world);
         
-        Node terrainNode = new Node();
         terrainNode.addControl(world);
         terrainNode.addControl(new RigidBodyControl(0));
         myMain.getGamePhysics().getBulletAppState().getPhysicsSpace().addAll(terrainNode);
@@ -75,6 +76,25 @@ public class WorldGenerator implements BlockChunkListener
     private void expandWorld()
     {
         
+    }
+    
+    /**
+     * Method handles returning the node which all the blocks are stored
+     * 
+     * @return terrainNode
+     */
+    public Node getWorldNode()
+    {
+        return terrainNode;
+    }
+    
+    /**
+     * Method removes a block at a given coordinate
+     * @param coordinates 
+     */
+    public void removeBlock(Vector3Int coordinates)
+    {
+        world.removeBlock(coordinates);
     }
     
     @Override

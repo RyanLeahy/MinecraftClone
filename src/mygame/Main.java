@@ -2,13 +2,9 @@ package mygame;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.input.controls.ActionListener;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 
 /**
@@ -73,6 +69,16 @@ public class Main extends SimpleApplication implements ActionListener, Applicati
     public Physics getGamePhysics()
     {
         return gamePhysics;
+    }
+    
+    /**
+     * Method returns the world generator of the game
+     * 
+     * @return gameWorldGen 
+     */
+    public WorldGenerator getWorldGenerator()
+    {
+        return gameWorldGen;
     }
     
     public Application getApplication()

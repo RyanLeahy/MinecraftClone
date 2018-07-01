@@ -13,6 +13,7 @@ public class MinecraftCamera
         myMain = mainClass;
         gameCam = cam;
         
+        
         moveSpeed(50f);
         rotationSpeed(1f);
     }
