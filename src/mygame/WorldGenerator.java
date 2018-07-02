@@ -7,13 +7,14 @@ package mygame;
 
 import com.cubes.BlockChunkControl;
 import com.cubes.BlockChunkListener;
+import com.cubes.BlockNavigator;
 import com.cubes.BlockTerrainControl;
 import com.cubes.Vector3Int;
 import com.jme3.bullet.collision.shapes.MeshCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.collision.CollisionResults;
 import com.jme3.math.Ray;
-import com.jme3.math.Vector3f;
+import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 
@@ -27,6 +28,8 @@ public class WorldGenerator implements BlockChunkListener
     private BlockDatabase myDatabase;
     private BlockTerrainControl world;
     private Node terrainNode;
+    private Physics gamePhysics;
+    private Camera gameCam;
     private int currentID;
     
     public WorldGenerator(Main mainClass, BlockDatabase databaseClass)
@@ -34,6 +37,9 @@ public class WorldGenerator implements BlockChunkListener
         myMain = mainClass;
         myDatabase = databaseClass;
         terrainNode = new Node();
+        gamePhysics = myMain.getGamePhysics();
+        gameCam = myMain.getMinecraftCam().getCam();
+        currentID = -1;
         initiateWorld();
     }
     
@@ -51,15 +57,18 @@ public class WorldGenerator implements BlockChunkListener
         generateTree(new Vector3Int(8, 61, 8), world);
         generateTree(new Vector3Int(16, 61, 16), world);
         
-        
-        for(int i = 0; i < 65; i++)
+        int x = 0;
+        for(int i = 0; i < 453; i++)
             if(myDatabase.createBlock(i) != null)
-                world.setBlock(new Vector3Int(i, 61, 32), myDatabase.createBlock(i));
+            {
+                world.setBlock(new Vector3Int(x, 61, 32), myDatabase.createBlock(i));
+                x++;
+            }
         
         
         terrainNode.addControl(world);
         terrainNode.addControl(new RigidBodyControl(0));
-        myMain.getGamePhysics().getBulletAppState().getPhysicsSpace().addAll(terrainNode);
+        gamePhysics.getBulletAppState().getPhysicsSpace().addAll(terrainNode);
         myMain.getRootNode().attachChild(terrainNode);
         world.addChunkListener(this);
     }
@@ -106,28 +115,22 @@ public class WorldGenerator implements BlockChunkListener
      */
     public void removeBlock(CollisionResults collisionResults)
     {
-        Ray ray = new Ray(myMain.getMinecraftCam().getCam().getLocation(), myMain.getMinecraftCam().getCam().getDirection());
+        Ray ray = new Ray(gameCam.getLocation(), gameCam.getDirection());
         terrainNode.collideWith(ray, collisionResults);
         if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
-        {
-            Vector3f tempTranslation = collisionResults.getClosestCollision().getContactPoint();
-            Vector3Int collisionPoint = new Vector3Int((int)tempTranslation.getX(), (int)tempTranslation.getY(), (int)tempTranslation.getZ());
-            world.removeBlock(collisionPoint);
-        }
+            world.removeBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), false)); //false value returns the coordinates of the block, true returns the coordinates of where the neighbor would be
     }
     
     public void addBlock(CollisionResults collisionResults)
     {
-        Ray ray = new Ray(myMain.getMinecraftCam().getCam().getLocation(), myMain.getMinecraftCam().getCam().getDirection());
+        Ray ray = new Ray(gameCam.getLocation(), gameCam.getDirection());
         terrainNode.collideWith(ray, collisionResults);
         if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
         {
-            Vector3f tempTranslation = collisionResults.getClosestCollision().getContactPoint();
-            Vector3Int collisionPoint = new Vector3Int((int)tempTranslation.getX(), (int)tempTranslation.getY(), (int)tempTranslation.getZ());
             if (currentID != -1) //if the search didn't fail use that block
-                world.setBlock(collisionPoint, myDatabase.createBlock(currentID));
+                world.setBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true), myDatabase.createBlock(currentID));
             else //otherwise use stone
-                world.setBlock(collisionPoint, myDatabase.createBlock(1)); 
+                world.setBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true), myDatabase.createBlock(1)); 
         }
     }
     
@@ -138,13 +141,11 @@ public class WorldGenerator implements BlockChunkListener
      */
     public void selectBlock(CollisionResults collisionResults)
     {
-        Ray ray = new Ray(myMain.getMinecraftCam().getCam().getLocation(), myMain.getMinecraftCam().getCam().getDirection());
+        Ray ray = new Ray(gameCam.getLocation(), gameCam.getDirection());
         terrainNode.collideWith(ray, collisionResults);
         if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
         {
-            Vector3f tempTranslation = collisionResults.getClosestCollision().getContactPoint();
-            Vector3Int collisionPoint = new Vector3Int((int)tempTranslation.getX(), (int)tempTranslation.getY(), (int)tempTranslation.getZ());
-            currentID = myDatabase.searchDatabase(world.getBlock(collisionPoint));
+            currentID = myDatabase.searchDatabase(world.getBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), false)));
         }
     }
     
@@ -166,7 +167,7 @@ public class WorldGenerator implements BlockChunkListener
         if(rigidBodyControl == null){
             rigidBodyControl = new RigidBodyControl(0);
             optimizedGeometry.addControl(rigidBodyControl);
-            myMain.getGamePhysics().getBulletAppState().getPhysicsSpace().add(rigidBodyControl);
+            gamePhysics.getBulletAppState().getPhysicsSpace().add(rigidBodyControl);
         }
         rigidBodyControl.setCollisionShape(new MeshCollisionShape(optimizedGeometry.getMesh()));
     }

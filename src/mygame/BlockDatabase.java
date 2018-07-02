@@ -51,6 +51,10 @@ public class BlockDatabase
         this.createOakWood();
         this.createBedrock();
         this.createOakLeaves();
+        this.createOakWoodPlank();
+        this.createGlass();
+        this.createCraftingTable();
+        this.createFurnace();
     }
     
     /**
@@ -234,6 +238,64 @@ public class BlockDatabase
         }
         
         return registeredBlocks[18];
+    }
+    
+    private Block createOakWoodPlank()
+    {
+        if(registeredBlocks[5] == null)
+        {
+            registeredBlocks[5] = new Block(new BlockSkin(new BlockSkin_TextureLocation(14,0), false));
+            BlockManager.register(registeredBlocks[5]);
+        }
+        
+        return registeredBlocks[5];
+    }
+    
+    private Block createGlass()
+    {
+        if(registeredBlocks[20] == null)
+        {
+            registeredBlocks[20] = new Block(new BlockSkin(new BlockSkin_TextureLocation(15,0), true));
+            BlockManager.register(registeredBlocks[20]);
+        }
+        
+        return registeredBlocks[20];
+    }
+    
+    private Block createCraftingTable()
+    {
+        if(registeredBlocks[58] == null)
+        {
+            registeredBlocks[58] = new Block(new BlockSkin[]{
+                new BlockSkin(new BlockSkin_TextureLocation(2,1), false),
+                new BlockSkin(new BlockSkin_TextureLocation(14,0), false),
+                new BlockSkin(new BlockSkin_TextureLocation(1,1), false),
+                new BlockSkin(new BlockSkin_TextureLocation(1,1), false),
+                new BlockSkin(new BlockSkin_TextureLocation(0,1), false),
+                new BlockSkin(new BlockSkin_TextureLocation(1,1), false)
+            });
+            BlockManager.register(registeredBlocks[58]);
+        }
+        
+        return registeredBlocks[58];
+    }
+    
+    private Block createFurnace()
+    {
+        if(registeredBlocks[61] == null)
+        {
+            registeredBlocks[61] = new Block(new BlockSkin[]{
+                new BlockSkin(new BlockSkin_TextureLocation(5,1), false),
+                new BlockSkin(new BlockSkin_TextureLocation(5,1), false),
+                new BlockSkin(new BlockSkin_TextureLocation(4,1), false),
+                new BlockSkin(new BlockSkin_TextureLocation(4,1), false),
+                new BlockSkin(new BlockSkin_TextureLocation(3,1), false),
+                new BlockSkin(new BlockSkin_TextureLocation(4,1), false)
+            });
+            BlockManager.register(registeredBlocks[61]);
+        }
+        
+        return registeredBlocks[61];
     }
 }
 

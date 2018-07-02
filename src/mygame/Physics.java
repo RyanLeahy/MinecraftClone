@@ -74,38 +74,6 @@ public class Physics implements PhysicsCollisionListener
         bulletAppState.setDebugEnabled(false);
     }
     
-    /* DEPRECATED FOR NOW
-     * Method takes in a spatial and adds all the necessary things to make it so you can't just walk through it
-     * @param model
-     * @param gravityValue
-     *
-    public void addCollision(Spatial model, float gravityValue)
-    {
-        CollisionShape modelShape;
-        currentModel = model;
-        
-        //if the item is not suppose to move
-        if (gravityValue == 0)
-            modelShape = CollisionShapeFactory.createMeshShape(model); //creates mesh shape, better suited for still objects
-        else
-            modelShape = CollisionShapeFactory.createDynamicMeshShape(model); //otherwise create a dynamic mesh shape, better suited for movable objects
-        
-        rigidBodyControl = new RigidBodyControl(modelShape, gravityValue); //gives hitbox and amount of weight to this
-        currentModel.addControl(rigidBodyControl); //add the hitbox and weight to the model
-        
-        //if the item is not suppose to move, have to check it again because the above if statement can't hold these in it because it relies on the subsequent lines, thats why were doing this agains
-        if (gravityValue == 0)
-            currentModel.getControl(RigidBodyControl.class).setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_02); //sets group to collision group 2, the group who ignores collisions
-        else
-        {
-            currentModel.getControl(RigidBodyControl.class).setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_01); //sets group to collision group 1, the group who checks collision
-            currentModel.getControl(RigidBodyControl.class).setKinematic(true);
-        }
-        
-        rigidBodyControl.setGravity(new Vector3f(0,-30f,0));
-        bulletAppState.getPhysicsSpace().add(model); //add it to the physics listener
-    }*/
-    
     public BulletAppState getBulletAppState()
     {
         return bulletAppState;
@@ -118,13 +86,13 @@ public class Physics implements PhysicsCollisionListener
     }
     
     /**
-     * Sets the coordinate location of the object passed to the addCollision method
-     * @param model
-     * @param coordinates 
+     * Method returns the current location of the player
+     * 
+     * @return characterLocation
      */
-    public void setLocation(Spatial model, Vector3f coordinates)
+    public Vector3f getLocation()
     {
-        model.getControl(RigidBodyControl.class).setPhysicsLocation(coordinates);
+        return characterControl.getPhysicsLocation();
     }
     
     private void setupPlayer()
