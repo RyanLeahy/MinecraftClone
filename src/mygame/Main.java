@@ -34,10 +34,10 @@ public class Main extends SimpleApplication implements ActionListener, Applicati
     @Override
     public void simpleInitApp()
     {
-        gameCam = new MinecraftCamera(myApp, cam);
-        gameKeyMap = new KeyMapping(myApp);
-        gameSky = new MinecraftSky(myApp);
         gamePhysics = new Physics(myApp);
+        gameKeyMap = new KeyMapping(myApp);
+        gameCam = new MinecraftCamera(myApp, cam);
+        gameSky = new MinecraftSky(myApp);
         gameGui = new GUI(myApp);
         gameDatabase = new BlockDatabase(myApp);
         gameWorldGen = new WorldGenerator(myApp, gameDatabase);
@@ -81,6 +81,11 @@ public class Main extends SimpleApplication implements ActionListener, Applicati
         return gameWorldGen;
     }
     
+    public KeyMapping getKeyMapping()
+    {
+        return gameKeyMap;
+    }
+    
     public Application getApplication()
     {
         return application;
@@ -89,7 +94,10 @@ public class Main extends SimpleApplication implements ActionListener, Applicati
     @Override
     public void simpleUpdate(float tpf)
     {
-        gamePhysics.simpleUpdate(tpf);
+        //gameKeyMap.simpleUpdate(tpf); nothing currently in simpleUpdate so unnecessary
+        gameCam.simpleUpdate(tpf);
+        //gamePhysics.simpleUpdate(tpf); nothing currently in simpleUpdate so unnecessary
+        gameWorldGen.simpleUpdate(tpf);
     }
 
     @Override
@@ -101,7 +109,7 @@ public class Main extends SimpleApplication implements ActionListener, Applicati
     @Override
     public void onAction(String name, boolean isPressed, float tpf)
     {
-        gamePhysics.onAction(name, isPressed, tpf); //pass off the action to the physics class
+        gameKeyMap.onAction(name, isPressed, tpf); //pass off the action to the key mapping class
     }
 }
     

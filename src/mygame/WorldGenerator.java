@@ -14,6 +14,7 @@ import com.jme3.bullet.collision.shapes.MeshCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.collision.CollisionResults;
 import com.jme3.math.Ray;
+import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -31,6 +32,10 @@ public class WorldGenerator implements BlockChunkListener
     private Physics gamePhysics;
     private Camera gameCam;
     private int currentID;
+    private Vector3f playerSpawn;
+    private boolean[] keyPress;
+    private int blockDelay = 1;
+    
     
     public WorldGenerator(Main mainClass, BlockDatabase databaseClass)
     {
@@ -40,6 +45,8 @@ public class WorldGenerator implements BlockChunkListener
         gamePhysics = myMain.getGamePhysics();
         gameCam = myMain.getMinecraftCam().getCam();
         currentID = -1;
+        keyPress = myMain.getKeyMapping().getKeyPress();
+        setPlayerSpawn(new Vector3f(0, 70, 0));
         initiateWorld();
     }
     
@@ -96,6 +103,34 @@ public class WorldGenerator implements BlockChunkListener
     private void expandWorld()
     {
         
+    }
+    
+    /**
+     * method sets the location of where the player spawns in game
+     * @param coordinates 
+     */
+    public void setPlayerSpawn(Vector3f coordinates)
+    {
+        gamePhysics.getCharacterControl().setPhysicsLocation(coordinates);
+        playerSpawn = coordinates;
+    }
+    
+    /**
+     * Method handles what happens when you fall below a certain threshold
+     */
+    public void below0()
+    {
+        setPlayerSpawn(playerSpawn);
+    }
+    
+    /**
+     * Method returns the current location of the player
+     * 
+     * @return characterLocation
+     */
+    public Vector3f getLocation()
+    {
+        return gamePhysics.getCharacterControl().getPhysicsLocation();
     }
     
     /**
@@ -170,5 +205,19 @@ public class WorldGenerator implements BlockChunkListener
             gamePhysics.getBulletAppState().getPhysicsSpace().add(rigidBodyControl);
         }
         rigidBodyControl.setCollisionShape(new MeshCollisionShape(optimizedGeometry.getMesh()));
+    }
+    
+    public void simpleUpdate(float tpf)
+    {
+        //this handles what happens when the player falls out of the world and at what y value it occurs
+        if(gamePhysics.getCharacterControl().getPhysicsLocation().getY() < -50)
+            below0();
+        if(keyPress[KeyMapping.Keys.BREAK.ordinal()])
+            removeBlock(gamePhysics.getCollisionResults());
+        else if(keyPress[KeyMapping.Keys.PLACE.ordinal()])
+            addBlock(gamePhysics.getCollisionResults());
+        else if(keyPress[KeyMapping.Keys.SELECT_BLOCK.ordinal()])
+            selectBlock(gamePhysics.getCollisionResults());
+        
     }
 }
