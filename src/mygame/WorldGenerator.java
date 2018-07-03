@@ -34,7 +34,7 @@ public class WorldGenerator implements BlockChunkListener
     private int currentID;
     private Vector3f playerSpawn;
     private boolean[] keyPress;
-    private int blockDelay = 1;
+    private float blockDelay = 0f;
     
     
     public WorldGenerator(Main mainClass, BlockDatabase databaseClass)
@@ -195,9 +195,25 @@ public class WorldGenerator implements BlockChunkListener
         world.setBlock(coordinates, myDatabase.createBlock(id));
     }
     
+    private boolean delay(float tpf)
+    {
+        boolean back;
+        if(blockDelay >= tpf * 5 || blockDelay == 0)
+        {
+            blockDelay = 0;
+            back = true;
+        }
+        else
+            back = false;
+        
+        blockDelay += tpf;
+        
+        return back;
+    }
+    
     @Override
     public void onSpatialUpdated(BlockChunkControl blockChunk){
-        Geometry optimizedGeometry = blockChunk.getOptimizedGeometry_Opaque();
+        Geometry optimizedGeometry = blockChunk.getOptimizedGeometry();
         RigidBodyControl rigidBodyControl = optimizedGeometry.getControl(RigidBodyControl.class);
         if(rigidBodyControl == null){
             rigidBodyControl = new RigidBodyControl(0);
@@ -212,12 +228,15 @@ public class WorldGenerator implements BlockChunkListener
         //this handles what happens when the player falls out of the world and at what y value it occurs
         if(gamePhysics.getCharacterControl().getPhysicsLocation().getY() < -50)
             below0();
-        if(keyPress[KeyMapping.Keys.BREAK.ordinal()])
+        
+        if(keyPress[KeyMapping.Keys.BREAK.ordinal()] && delay(tpf))
             removeBlock(gamePhysics.getCollisionResults());
-        else if(keyPress[KeyMapping.Keys.PLACE.ordinal()])
+        else if(keyPress[KeyMapping.Keys.PLACE.ordinal()] && delay(tpf))
             addBlock(gamePhysics.getCollisionResults());
-        else if(keyPress[KeyMapping.Keys.SELECT_BLOCK.ordinal()])
+        else if(keyPress[KeyMapping.Keys.SELECT_BLOCK.ordinal()] && delay(tpf))
             selectBlock(gamePhysics.getCollisionResults());
+        //else
+            //blockDelay = 0;
         
     }
 }

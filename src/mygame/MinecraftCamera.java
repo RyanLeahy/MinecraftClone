@@ -10,9 +10,9 @@ public class MinecraftCamera
     private Physics gamePhysics;
    
     //walking instance variables
-    private Vector3f walkDirection = new Vector3f(); //three vectors are used for walking
-    private Vector3f camDir = new Vector3f();
-    private Vector3f camLeft = new Vector3f();
+    private Vector3f walkDirection;
+    private Vector3f camDir;
+    private Vector3f camLeft;
     
     private boolean[] keyPress;
     
@@ -23,6 +23,9 @@ public class MinecraftCamera
         gameCam = cam;
         gamePhysics = myMain.getGamePhysics();
         keyPress = myMain.getKeyMapping().getKeyPress();
+        walkDirection = new Vector3f();
+        camDir = new Vector3f();
+        camLeft = new Vector3f();
     }
 
     /**
@@ -63,36 +66,6 @@ public class MinecraftCamera
         camLeft.set(coordinates).multLocal(speed);
     }
     
-    /**
-     * Method returns the local walk direction to the caller
-     * 
-     * @return walkDirection
-     */
-    public Vector3f getWalkDirection()
-    {
-        return walkDirection;
-    }
-    
-    /**
-     * Method returns the local Cam direction to the caller
-     * 
-     * @return camDir
-     */
-    public Vector3f getCamDir()
-    {
-        return camDir;
-    }
-    
-    /**
-     * Method returns the local Cam Left to the caller
-     * 
-     * @return camLeft 
-     */
-    public Vector3f getCamLeft()
-    {
-        return camLeft;
-    }
-    
     public void simpleUpdate(float tpf)
     {
         if (keyPress[KeyMapping.Keys.CROUCH.ordinal()]) //if the shift key is pressed
@@ -105,25 +78,25 @@ public class MinecraftCamera
         }
         
         //this handles player movement
-        getWalkDirection().set(0, 0, 0);
+        walkDirection.set(0, 0, 0);
         if (keyPress[KeyMapping.Keys.LEFT.ordinal()]) 
         {
-            getWalkDirection().addLocal(getCamLeft());
+            walkDirection.addLocal(camLeft);
         }
         if (keyPress[KeyMapping.Keys.RIGHT.ordinal()]) 
         {
-            getWalkDirection().addLocal(getCamLeft().negate());
+            walkDirection.addLocal(camLeft.negate());
         }
         if (keyPress[KeyMapping.Keys.UP.ordinal()]) 
         {
-            getWalkDirection().addLocal(getCamDir());
+            walkDirection.addLocal(camDir);
         }
         if (keyPress[KeyMapping.Keys.DOWN.ordinal()]) 
         {
-            getWalkDirection().addLocal(getCamDir().negate());
+            walkDirection.addLocal(camDir.negate());
         }
-        getWalkDirection().setY(0); //this makes it so pointing at the sky doesn't actually move the character into the sky, the only way that the player should raise in Y is by jumping
-        gamePhysics.getCharacterControl().setWalkDirection(getWalkDirection());
+        walkDirection.setY(0); //this makes it so pointing at the sky doesn't actually move the character into the sky, the only way that the player should raise in Y is by jumping
+        gamePhysics.getCharacterControl().setWalkDirection(walkDirection);
         getCam().setLocation(gamePhysics.getCharacterControl().getPhysicsLocation());
     }
 }
