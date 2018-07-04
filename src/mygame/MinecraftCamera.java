@@ -16,6 +16,8 @@ public class MinecraftCamera
     
     private boolean[] keyPress;
     
+    private int curPerspective;
+    
     //constructor that takes in the default camera from main
     public MinecraftCamera (Main mainClass, Camera cam)
     {
@@ -26,6 +28,7 @@ public class MinecraftCamera
         walkDirection = new Vector3f();
         camDir = new Vector3f();
         camLeft = new Vector3f();
+        curPerspective = 0;
     }
 
     /**
@@ -66,6 +69,23 @@ public class MinecraftCamera
         camLeft.set(coordinates).multLocal(speed);
     }
     
+    private Vector3f setPerspective(Vector3f coords)
+    {
+        Vector3f ret = coords;
+        Vector3f temp;
+        
+        switch (curPerspective)
+        {
+            case 1:
+                
+                return ret;
+            case 2:
+                return ret;
+            default:
+                return ret;
+        }
+    }
+    
     public void simpleUpdate(float tpf)
     {
         if (keyPress[KeyMapping.Keys.CROUCH.ordinal()]) //if the shift key is pressed
@@ -97,6 +117,14 @@ public class MinecraftCamera
         }
         walkDirection.setY(0); //this makes it so pointing at the sky doesn't actually move the character into the sky, the only way that the player should raise in Y is by jumping
         gamePhysics.getCharacterControl().setWalkDirection(walkDirection);
-        getCam().setLocation(gamePhysics.getCharacterControl().getPhysicsLocation());
+        
+        //if the key to change the perspective is called increase the current perspective int
+        if(keyPress[KeyMapping.Keys.CHANGE_PERSPECTIVE.ordinal()])
+        {
+            curPerspective++;
+            if (curPerspective == 2) //if it reaches the max amount of perspectives reset it
+                curPerspective = 0;
+        }    
+            getCam().setLocation(setPerspective(gamePhysics.getCharacterControl().getPhysicsLocation()));
     }
 }

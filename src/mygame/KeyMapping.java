@@ -28,7 +28,7 @@ public class KeyMapping
     
     //key handling instance variables
     private boolean[] keyPress; //boolean array to store if keys are pressed or not
-    public enum Keys {LEFT, RIGHT, UP, DOWN, CROUCH, BREAK, PLACE, SELECT_BLOCK}; //enumeration for indexing the array
+    public enum Keys {LEFT, RIGHT, UP, DOWN, CROUCH, BREAK, PLACE, SELECT_BLOCK, CHANGE_PERSPECTIVE}; //enumeration for indexing the array
     
     public KeyMapping(Main mainClass)
     {
@@ -53,6 +53,7 @@ public class KeyMapping
         addMap("Break", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         addMap("Place", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
         addMap("SelectBlock", new MouseButtonTrigger(MouseInput.BUTTON_MIDDLE));
+        addMap("ChangePerspective", new KeyTrigger(KeyInput.KEY_F5));
     }
     
     /**
@@ -111,6 +112,9 @@ public class KeyMapping
                 break;
             case "SelectBlock":    
                 if (isPressed) { keyPress[Keys.SELECT_BLOCK.ordinal()] = true; } else { keyPress[Keys.SELECT_BLOCK.ordinal()] = false; }
+                break;
+            case "ChangePerspective":
+                if (isPressed) { keyPress[Keys.CHANGE_PERSPECTIVE.ordinal()] = true;} else { keyPress[Keys.CHANGE_PERSPECTIVE.ordinal()] = false; }
                 break;
             default:
                 break;
