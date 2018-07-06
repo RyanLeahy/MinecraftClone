@@ -195,7 +195,7 @@ public class WorldGenerator implements BlockChunkListener
         world.setBlock(coordinates, myDatabase.createBlock(id));
     }
     
-    private boolean delay(float tpf)
+    /*private boolean delay(float tpf) //deprecated for now
     {
         boolean back;
         if(blockDelay >= tpf * 5 || blockDelay == 0)
@@ -209,7 +209,7 @@ public class WorldGenerator implements BlockChunkListener
         blockDelay += tpf;
         
         return back;
-    }
+    }*/
     
     @Override
     public void onSpatialUpdated(BlockChunkControl blockChunk){
@@ -223,20 +223,29 @@ public class WorldGenerator implements BlockChunkListener
         rigidBodyControl.setCollisionShape(new MeshCollisionShape(optimizedGeometry.getMesh()));
     }
     
+    public void onAction(String name, boolean isPressed, float tpf)
+    {
+        switch (name)
+        {
+            case "Break":
+                if (isPressed) { removeBlock(gamePhysics.getCollisionResults()); }
+                break;
+            case "Place":
+                if (isPressed) { addBlock(gamePhysics.getCollisionResults()); }
+                break;
+            case "SelectBlock":    
+                if (isPressed) { selectBlock(gamePhysics.getCollisionResults()); }
+                break;
+            default:
+                break;
+        }
+    }
+    
     public void simpleUpdate(float tpf)
     {
         //this handles what happens when the player falls out of the world and at what y value it occurs
         if(gamePhysics.getCharacterControl().getPhysicsLocation().getY() < -50)
             below0();
-        
-        if(keyPress[KeyMapping.Keys.BREAK.ordinal()] && delay(tpf))
-            removeBlock(gamePhysics.getCollisionResults());
-        else if(keyPress[KeyMapping.Keys.PLACE.ordinal()] && delay(tpf))
-            addBlock(gamePhysics.getCollisionResults());
-        else if(keyPress[KeyMapping.Keys.SELECT_BLOCK.ordinal()] && delay(tpf))
-            selectBlock(gamePhysics.getCollisionResults());
-        //else
-            //blockDelay = 0;
         
     }
 }

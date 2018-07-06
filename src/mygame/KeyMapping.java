@@ -34,11 +34,18 @@ public class KeyMapping
     {
         myMain = mainClass;
         inputManager = myMain.getInputManager();
+        keyPress = new boolean[Keys.values().length]; //creates a boolean array the same size as the amount of enumerations
+        defaultMap();
+    }
+    
+    /**
+     * Method initializes variables that can't be initialized on instanciation
+     */
+    public void initialize()
+    {
         gameCam = myMain.getMinecraftCam();
         gamePhysics = myMain.getGamePhysics();
         gameWorldGen = myMain.getWorldGenerator();
-        keyPress = new boolean[Keys.values().length]; //creates a boolean array the same size as the amount of enumerations
-        defaultMap();
     }
     
     //method maps all the default keys
@@ -105,16 +112,16 @@ public class KeyMapping
                 if (gamePhysics.getCharacterCollision() && isPressed) {gamePhysics.getCharacterControl().jump(new Vector3f(0, 10f, 0));} else { gamePhysics.setCharacterCollision(false);} //if key is pressed and the character is touching an object
                 break;
             case "Break":
-                if (isPressed) { keyPress[Keys.BREAK.ordinal()] = true; } else { keyPress[Keys.BREAK.ordinal()] = false; }
+                if (isPressed) { keyPress[Keys.BREAK.ordinal()] = true; gameWorldGen.onAction(name, isPressed, tpf); } else { keyPress[Keys.BREAK.ordinal()] = false; }
                 break;
             case "Place":
-                if (isPressed) { keyPress[Keys.PLACE.ordinal()] = true; } else { keyPress[Keys.PLACE.ordinal()] = false; }
+                if (isPressed) { keyPress[Keys.PLACE.ordinal()] = true; gameWorldGen.onAction(name, isPressed, tpf); } else { keyPress[Keys.PLACE.ordinal()] = false; }
                 break;
             case "SelectBlock":    
-                if (isPressed) { keyPress[Keys.SELECT_BLOCK.ordinal()] = true; } else { keyPress[Keys.SELECT_BLOCK.ordinal()] = false; }
+                if (isPressed) { keyPress[Keys.SELECT_BLOCK.ordinal()] = true; gameWorldGen.onAction(name, isPressed, tpf); } else { keyPress[Keys.SELECT_BLOCK.ordinal()] = false; }
                 break;
             case "ChangePerspective":
-                if (isPressed) { keyPress[Keys.CHANGE_PERSPECTIVE.ordinal()] = true;} else { keyPress[Keys.CHANGE_PERSPECTIVE.ordinal()] = false; }
+                if (isPressed) { keyPress[Keys.CHANGE_PERSPECTIVE.ordinal()] = true; gameCam.onAction(name, isPressed, tpf); } else { keyPress[Keys.CHANGE_PERSPECTIVE.ordinal()] = false; }
                 break;
             default:
                 break;

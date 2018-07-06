@@ -1,9 +1,10 @@
 package mygame;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera; //default camera
 
-public class MinecraftCamera
+public class MinecraftCamera 
 {
     private Camera gameCam; //camera instance variable
     private Main myMain; //holds on to the main object so that it can call its methods if necessary
@@ -69,21 +70,43 @@ public class MinecraftCamera
         camLeft.set(coordinates).multLocal(speed);
     }
     
-    private Vector3f setPerspective(Vector3f coords)
+    private void setPerspective(Vector3f coords)
     {
-        Vector3f ret = coords;
-        Vector3f temp;
+        Quaternion temp = getCam().getRotation();
         
         switch (curPerspective)
         {
             case 1:
-                
-                return ret;
+                getCam().setLocation(coords);
+                getCam().setAxes(temp.fromAngles(0,1,0));
+                break;
             case 2:
-                return ret;
+                getCam().setLocation(coords);
+                //getCam().setRotation(new Quaternion());
+                break;
             default:
-                return ret;
+                getCam().setLocation(coords);
+                //getCam().setAxes(temp.fromAngles(0,0,0));
+                break;
         }
+        
+        if(curPerspective == 2)
+            curPerspective = 0;
+    }
+    
+    public void onAction(String name, boolean isPressed, float tpf)
+    {
+        switch(name)
+        {
+            case "ChangePerspective":
+                if(isPressed) { curPerspective++;}
+                break;
+        }
+    }
+    
+    public void onAnalog(String name, float value, float tpf)
+    {
+        
     }
     
     public void simpleUpdate(float tpf)
@@ -91,7 +114,7 @@ public class MinecraftCamera
         if (keyPress[KeyMapping.Keys.CROUCH.ordinal()]) //if the shift key is pressed
         {
             CrouchSpeed();
-        }
+        } 
         else //if its not pressed
         {
             normalSpeed();
@@ -117,14 +140,6 @@ public class MinecraftCamera
         }
         walkDirection.setY(0); //this makes it so pointing at the sky doesn't actually move the character into the sky, the only way that the player should raise in Y is by jumping
         gamePhysics.getCharacterControl().setWalkDirection(walkDirection);
-        
-        //if the key to change the perspective is called increase the current perspective int
-        if(keyPress[KeyMapping.Keys.CHANGE_PERSPECTIVE.ordinal()])
-        {
-            curPerspective++;
-            if (curPerspective == 2) //if it reaches the max amount of perspectives reset it
-                curPerspective = 0;
-        }    
-            getCam().setLocation(setPerspective(gamePhysics.getCharacterControl().getPhysicsLocation()));
+        setPerspective(gamePhysics.getCharacterControl().getPhysicsLocation()); 
     }
 }

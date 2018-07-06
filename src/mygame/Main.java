@@ -5,6 +5,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
 import com.jme3.system.AppSettings;
 
 /**
@@ -13,7 +14,7 @@ import com.jme3.system.AppSettings;
  * 
  * @author Ryan Leahy
  */
-public class Main extends SimpleApplication implements ActionListener, Application //for keyMapping to work
+public class Main extends SimpleApplication implements ActionListener//, AnalogListener //for keyMapping and camera
 {
     private static Main myApp;
     private Physics gamePhysics;
@@ -42,6 +43,7 @@ public class Main extends SimpleApplication implements ActionListener, Applicati
         gameDatabase = new BlockDatabase(myApp);
         gameWorldGen = new WorldGenerator(myApp, gameDatabase);
         
+        gameKeyMap.initialize();
         rootNode.addLight(new MinecraftLight().getWorldLight());
     }
     
@@ -111,5 +113,11 @@ public class Main extends SimpleApplication implements ActionListener, Applicati
     {
         gameKeyMap.onAction(name, isPressed, tpf); //pass off the action to the key mapping class
     }
+
+    /*@Override
+    public void onAnalog(String name, float value, float tpf)
+    {
+        gameCam.onAnalog(name, value, tpf);
+    }*/
 }
     
