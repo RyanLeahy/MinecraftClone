@@ -1,8 +1,10 @@
 package mygame;
 
 import com.jme3.math.Quaternion;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera; //default camera
+import com.jme3.renderer.ViewPort;
 
 public class MinecraftCamera 
 {
@@ -14,6 +16,10 @@ public class MinecraftCamera
     private Vector3f walkDirection;
     private Vector3f camDir;
     private Vector3f camLeft;
+    
+    private Camera frontPerspective;
+    private Camera backPerspective;
+    ViewPort frontView, backView;
     
     private boolean[] keyPress;
     
@@ -29,7 +35,12 @@ public class MinecraftCamera
         walkDirection = new Vector3f();
         camDir = new Vector3f();
         camLeft = new Vector3f();
+        frontPerspective = gameCam.clone();
+        backPerspective = gameCam.clone();
         curPerspective = 0;
+        frontView = myMain.getRenderManager().createMainView("frontPerspective", frontPerspective);
+                frontView.setClearFlags(true, true, true);
+                frontView.attachScene(myMain.getRootNode());
     }
 
     /**
@@ -70,23 +81,37 @@ public class MinecraftCamera
         camLeft.set(coordinates).multLocal(speed);
     }
     
-    private void setPerspective(Vector3f coords)
+    private void setPerspective(Vector3f coords, Quaternion rotation)
     {
-        Quaternion temp = getCam().getRotation();
+        float x,y,z;
+        Vector3f manipulate;
+        
         
         switch (curPerspective)
         {
             case 1:
+                x = coords.getX() + (10 * getCam().getDirection().getX());
+                y = coords.getY() + (10 * getCam().getDirection().getY());
+                z = coords.getZ() + (10 * getCam().getDirection().getZ());
+                manipulate = new Vector3f(x,y,z);
+                frontPerspective.setLocation(manipulate);
+                frontPerspective.setRotation(rotation);
+                backPerspective.setViewPort(0,0,0,0);
+                getCam().setViewPort( 0.5f , 1.0f  ,  0.0f , 0.5f);
                 getCam().setLocation(coords);
-                getCam().setAxes(temp.fromAngles(0,1,0));
+                frontPerspective.setViewPort(0,1,0,1);
+                
                 break;
             case 2:
                 getCam().setLocation(coords);
-                //getCam().setRotation(new Quaternion());
+                frontPerspective.setViewPort(0,0,0,0);
+                getCam().setViewPort(0,1,0,1);
                 break;
             default:
                 getCam().setLocation(coords);
-                //getCam().setAxes(temp.fromAngles(0,0,0));
+                frontPerspective.setViewPort(0,0,0,0);
+                getCam().setViewPort(0,1,0,1);
+                System.out.println(getCam().getLocation() + " " + getCam().getDirection());
                 break;
         }
         
@@ -140,6 +165,6 @@ public class MinecraftCamera
         }
         walkDirection.setY(0); //this makes it so pointing at the sky doesn't actually move the character into the sky, the only way that the player should raise in Y is by jumping
         gamePhysics.getCharacterControl().setWalkDirection(walkDirection);
-        setPerspective(gamePhysics.getCharacterControl().getPhysicsLocation()); 
+        setPerspective(gamePhysics.getCharacterControl().getPhysicsLocation(), getCam().getRotation()); 
     }
 }
