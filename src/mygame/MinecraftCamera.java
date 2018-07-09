@@ -39,8 +39,11 @@ public class MinecraftCamera
         backPerspective = gameCam.clone();
         curPerspective = 0;
         frontView = myMain.getRenderManager().createMainView("frontPerspective", frontPerspective);
-                frontView.setClearFlags(true, true, true);
-                frontView.attachScene(myMain.getRootNode());
+        frontView.setClearFlags(true, true, true);
+        frontView.attachScene(myMain.getRootNode());
+        backView = myMain.getRenderManager().createMainView("backPerspective", backPerspective);
+        backView.setClearFlags(true, true, true);
+        backView.attachScene(myMain.getRootNode());
     }
 
     /**
@@ -84,18 +87,18 @@ public class MinecraftCamera
     private void setPerspective(Vector3f coords, Quaternion rotation)
     {
         float x,y,z;
-        Vector3f manipulate;
-        
+        Vector3f manipulateCoords;
+        Quaternion manipulateRotate = rotation.clone();
         
         switch (curPerspective)
         {
             case 1:
-                x = coords.getX() + (10 * getCam().getDirection().getX());
-                y = coords.getY() + (10 * getCam().getDirection().getY());
-                z = coords.getZ() + (10 * getCam().getDirection().getZ());
-                manipulate = new Vector3f(x,y,z);
-                frontPerspective.setLocation(manipulate);
-                frontPerspective.setRotation(rotation);
+                x = coords.getX() + (5 * gameCam.getDirection().getX());
+                y = coords.getY() + (1 * gameCam.getDirection().getY());
+                z = coords.getZ() + (5 * gameCam.getDirection().getZ());
+                manipulateCoords = new Vector3f(x,y,z);
+                frontPerspective.setLocation(manipulateCoords);
+                frontPerspective.setRotation(manipulateRotate);
                 backPerspective.setViewPort(0,0,0,0);
                 getCam().setViewPort( 0.5f , 1.0f  ,  0.0f , 0.5f);
                 getCam().setLocation(coords);
@@ -103,19 +106,27 @@ public class MinecraftCamera
                 
                 break;
             case 2:
-                getCam().setLocation(coords);
+                x = coords.getX() + (-5 * gameCam.getDirection().getX());
+                y = coords.getY() + (-1 * gameCam.getDirection().getY());
+                z = coords.getZ() + (-5 * gameCam.getDirection().getZ());
+                manipulateCoords = new Vector3f(x,y,z);
+                backPerspective.setLocation(manipulateCoords);
+                backPerspective.setRotation(manipulateRotate);
                 frontPerspective.setViewPort(0,0,0,0);
-                getCam().setViewPort(0,1,0,1);
+                getCam().setViewPort( 0.5f , 1.0f  ,  0.0f , 0.5f);
+                getCam().setLocation(coords);
+                backPerspective.setViewPort(0,1,0,1);
                 break;
             default:
                 getCam().setLocation(coords);
                 frontPerspective.setViewPort(0,0,0,0);
+                backPerspective.setViewPort(0,0,0,0);
                 getCam().setViewPort(0,1,0,1);
                 System.out.println(getCam().getLocation() + " " + getCam().getDirection());
                 break;
         }
         
-        if(curPerspective == 2)
+        if(curPerspective == 3)
             curPerspective = 0;
     }
     
