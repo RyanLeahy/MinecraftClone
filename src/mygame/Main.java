@@ -7,6 +7,7 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.system.AppSettings;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * The Main class initializes and offers methods to help other classes use and add to the game
@@ -25,6 +26,7 @@ public class Main extends SimpleApplication implements ActionListener//, AnalogL
     private BlockDatabase gameDatabase;
     private WorldGenerator gameWorldGen;
     private Application application;
+    private ScheduledThreadPoolExecutor executor;
     
     public static void main(String[] args)
     {
@@ -35,6 +37,7 @@ public class Main extends SimpleApplication implements ActionListener//, AnalogL
     @Override
     public void simpleInitApp()
     {
+        executor = new ScheduledThreadPoolExecutor(1);
         gamePhysics = new Physics(myApp);
         gameKeyMap = new KeyMapping(myApp);
         gameCam = new MinecraftCamera(myApp, cam);
@@ -114,6 +117,12 @@ public class Main extends SimpleApplication implements ActionListener//, AnalogL
         gameKeyMap.onAction(name, isPressed, tpf); //pass off the action to the key mapping class
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        executor.shutdown();
+    }
+    
     /*@Override
     public void onAnalog(String name, float value, float tpf)
     {

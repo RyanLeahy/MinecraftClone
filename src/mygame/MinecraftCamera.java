@@ -93,10 +93,11 @@ public class MinecraftCamera
         switch (curPerspective)
         {
             case 1:
-                x = coords.getX() + (5 * gameCam.getDirection().getX());
+                x = coords.getX() + (5 * gameCam.getDirection().getX()); //multiply the amount of blocks you want it to go out by with the direction number, the direction is a float between 0-1 and it helps make the position not fixed but able to rotate with the cam
                 y = coords.getY() + (1 * gameCam.getDirection().getY());
                 z = coords.getZ() + (5 * gameCam.getDirection().getZ());
                 manipulateCoords = new Vector3f(x,y,z);
+                manipulateRotate.lookAt(gameCam.getDirection().negate(), gameCam.getUp()); //look at the opposite direction as the main cam, use it's up axis
                 frontPerspective.setLocation(manipulateCoords);
                 frontPerspective.setRotation(manipulateRotate);
                 backPerspective.setViewPort(0,0,0,0);
@@ -122,12 +123,30 @@ public class MinecraftCamera
                 frontPerspective.setViewPort(0,0,0,0);
                 backPerspective.setViewPort(0,0,0,0);
                 getCam().setViewPort(0,1,0,1);
-                System.out.println(getCam().getLocation() + " " + getCam().getDirection());
                 break;
         }
         
         if(curPerspective == 3)
             curPerspective = 0;
+    }
+    
+    //prevents camera from doing a 360 by locking it if the direction becomes 1 or 0
+    private void lockCam()
+    {
+        Quaternion manipulateRotation = getCam().getRotation().clone();
+        Vector3f manipulateDirection = getCam().getDirection().clone();
+        if(getCam().getDirection().getY() < -0.989)
+        {
+            manipulateDirection.setY(-0.987f);
+            manipulateRotation.lookAt(manipulateDirection, getCam().getUp());
+            getCam().setRotation(manipulateRotation);
+        }
+        else if(getCam().getDirection().getY() > 0.95)
+        {    
+            manipulateDirection.setY(0.94f);
+            manipulateRotation.lookAt(manipulateDirection, getCam().getUp());
+            getCam().setRotation(manipulateRotation);
+        }
     }
     
     public void onAction(String name, boolean isPressed, float tpf)
@@ -176,6 +195,9 @@ public class MinecraftCamera
         }
         walkDirection.setY(0); //this makes it so pointing at the sky doesn't actually move the character into the sky, the only way that the player should raise in Y is by jumping
         gamePhysics.getCharacterControl().setWalkDirection(walkDirection);
-        setPerspective(gamePhysics.getCharacterControl().getPhysicsLocation(), getCam().getRotation()); 
+        
+        setPerspective(gamePhysics.getCharacterControl().getPhysicsLocation(), getCam().getRotation()); //this handles which camera mode is being used when f5 is pressed
+        
+        //lockCam(); //this handles making sure the camera doesn't do a sweet kick flip (can't rotate upside down)
     }
 }

@@ -3,3 +3,5 @@
 /MinecraftClone/build/classes
 /MinecraftClone/MANIFEST.MF
 /dist/
+*.log
+*.class

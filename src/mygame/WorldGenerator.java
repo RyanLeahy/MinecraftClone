@@ -99,6 +99,11 @@ public class WorldGenerator implements BlockChunkListener
         currentChunk.setBlockArea(new Vector3Int(x, y + 5, z + 1), new Vector3Int(1, 2, 1), myDatabase.createBlock(18));
     }
     
+    private void generateChunk(Vector3Int start, Vector3Int stop)
+    {
+        
+    }
+    
     //this will be used to render and derender as someone moves through chunks
     private void expandWorld()
     {
@@ -178,9 +183,10 @@ public class WorldGenerator implements BlockChunkListener
     {
         Ray ray = new Ray(gameCam.getLocation(), gameCam.getDirection());
         terrainNode.collideWith(ray, collisionResults);
-        if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
+        if(collisionResults.getClosestCollision() != null/* && collisionResults.getClosestCollision().getDistance() < 5*/) //add conditioning, first makes sure there is something to break, second makes sure its not too far
         {
             currentID = myDatabase.searchDatabase(world.getBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), false)));
+            world.removeChunk(new Vector3Int(collisionResults.getClosestCollision().getContactPoint()), world);
         }
     }
     
@@ -213,14 +219,25 @@ public class WorldGenerator implements BlockChunkListener
     
     @Override
     public void onSpatialUpdated(BlockChunkControl blockChunk){
-        Geometry optimizedGeometry = blockChunk.getOptimizedGeometry();
+        Geometry optimizedGeometry;
+        MeshCollisionShape optimizedShape;
+        
+        Object[] results;
+        onSpatialUpdate optimized = new onSpatialUpdate();
+        Thread t = new Thread(optimized);
+        t.start();
+        results = optimized.getOptimized(blockChunk);
+        
+        optimizedGeometry = (Geometry)results[0];
+        optimizedShape = (MeshCollisionShape)results[1];
+        
         RigidBodyControl rigidBodyControl = optimizedGeometry.getControl(RigidBodyControl.class);
         if(rigidBodyControl == null){
             rigidBodyControl = new RigidBodyControl(0);
             optimizedGeometry.addControl(rigidBodyControl);
             gamePhysics.getBulletAppState().getPhysicsSpace().add(rigidBodyControl);
         }
-        rigidBodyControl.setCollisionShape(new MeshCollisionShape(optimizedGeometry.getMesh()));
+        rigidBodyControl.setCollisionShape(optimizedShape);
     }
     
     public void onAction(String name, boolean isPressed, float tpf)
@@ -247,5 +264,25 @@ public class WorldGenerator implements BlockChunkListener
         if(gamePhysics.getCharacterControl().getPhysicsLocation().getY() < -50)
             below0();
         
+    }
+    
+    private static class onSpatialUpdate implements Runnable
+    {
+        private Object[] optimized;
+        
+        @Override
+        public void run()
+        {
+            
+        }
+        
+        public Object[] getOptimized(BlockChunkControl blockChunk)
+        {
+            optimized = new Object[2];
+            optimized[0] = blockChunk.getOptimizedGeometry();
+            optimized[1] = new MeshCollisionShape(((Geometry)optimized[0]).getMesh());
+            
+            return optimized;
+        }
     }
 }

@@ -182,7 +182,7 @@ public class BlockChunkControl extends AbstractControl implements BitSerializabl
     public Vector3Int getLocation(){
         return location;
     }
-
+    
     public Vector3Int getBlockLocation(){
         return blockLocation;
     }

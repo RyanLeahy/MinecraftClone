@@ -4,6 +4,8 @@
  */
 package com.cubes;
 
+import com.jme3.math.Vector3f;
+
 /**
  *
  * @author Carl
@@ -17,6 +19,14 @@ public class Vector3Int{
         this.z = z;
     }
 
+    public Vector3Int(Vector3f convert)
+    {
+        this();
+        this.x = (int)convert.getX();
+        this.y = (int)convert.getY();
+        this.z = (int)convert.getZ();
+    }
+    
     public Vector3Int(){
         
     }
