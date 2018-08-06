@@ -18,6 +18,10 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  *
@@ -35,6 +39,7 @@ public class WorldGenerator implements BlockChunkListener
     private Vector3f playerSpawn;
     private boolean[] keyPress;
     private float blockDelay = 0f;
+    private File worldFile;
     
     
     public WorldGenerator(Main mainClass, BlockDatabase databaseClass)
@@ -47,6 +52,7 @@ public class WorldGenerator implements BlockChunkListener
         currentID = -1;
         keyPress = myMain.getKeyMapping().getKeyPress();
         setPlayerSpawn(new Vector3f(0, 70, 0));
+        worldFile = new File("C:/Users/rplea/OneDrive/Documents/GitHub/MinecraftClone/testworld.txt"); //CHANGE LATER TO NOT BE STATIC!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         initiateWorld();
     }
     
@@ -110,6 +116,32 @@ public class WorldGenerator implements BlockChunkListener
         
     }
     
+    //method will read the changes that was made to the world and will process it
+    private void readChanges() throws IOException
+    {
+        
+    }
+    
+    //method will write the changes to the world to a file
+    private void writeChanges(String type, Vector3Int coords, int blockID) throws IOException
+    {
+        BufferedWriter data;
+        String rawData;
+        
+        if(blockID == -1) //if the blockID is -1 that means that there is no actual blockID and should not be in the file
+            rawData = type + " " + coords.getX() + " " + coords.getY() + " " + coords.getZ(); //example: "b 10 20 -40 " that is break a block at 10,20,-40
+        else
+            rawData = type + " " + coords.getX() + " " + coords.getY() + " " + coords.getZ() + " " + blockID; //example: "a 10 20 -40 1" that is add a block at 10,20,-40 with block id of 1
+        
+        if(worldFile.exists() == false) //if there is no file create one
+            worldFile.createNewFile();
+        
+        data = new BufferedWriter(new FileWriter(worldFile));
+        data.append(type);
+        data.newLine();
+        data.close();
+    }
+    
     /**
      * method sets the location of where the player spawns in game
      * @param coordinates 
@@ -158,7 +190,18 @@ public class WorldGenerator implements BlockChunkListener
         Ray ray = new Ray(gameCam.getLocation(), gameCam.getDirection());
         terrainNode.collideWith(ray, collisionResults);
         if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
+        {
             world.removeBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), false)); //false value returns the coordinates of the block, true returns the coordinates of where the neighbor would be
+            
+            try
+            {
+                writeChanges("b", BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), false), -1);
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
     
     public void addBlock(CollisionResults collisionResults)
@@ -168,9 +211,31 @@ public class WorldGenerator implements BlockChunkListener
         if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
         {
             if (currentID != -1) //if the search didn't fail use that block
+            {
                 world.setBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true), myDatabase.createBlock(currentID));
+                
+                try
+                {
+                    writeChanges("a", BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true), currentID);
+                }
+                catch(IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
             else //otherwise use stone
+            {
                 world.setBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true), myDatabase.createBlock(1)); 
+                
+                try
+                {
+                    writeChanges("a", BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true), 1);
+                }
+                catch(IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
         }
     }
     
@@ -186,7 +251,7 @@ public class WorldGenerator implements BlockChunkListener
         if(collisionResults.getClosestCollision() != null/* && collisionResults.getClosestCollision().getDistance() < 5*/) //add conditioning, first makes sure there is something to break, second makes sure its not too far
         {
             currentID = myDatabase.searchDatabase(world.getBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), false)));
-            world.removeChunk(new Vector3Int(collisionResults.getClosestCollision().getContactPoint()), world);
+            removeChunk(new Vector3Int(collisionResults.getClosestCollision().getContactPoint()));
         }
     }
     
@@ -199,6 +264,12 @@ public class WorldGenerator implements BlockChunkListener
     public void addBlock(Vector3Int coordinates, int id)
     {
         world.setBlock(coordinates, myDatabase.createBlock(id));
+    }
+    
+    public void removeChunk(Vector3Int blockLocation)
+    {
+        if(blockLocation != null)
+            world.removeBlockArea(world.getStart(blockLocation), new Vector3Int(myDatabase.getSettings().getChunkSizeX(),256,myDatabase.getSettings().getChunkSizeZ()));
     }
     
     /*private boolean delay(float tpf) //deprecated for now
@@ -219,25 +290,14 @@ public class WorldGenerator implements BlockChunkListener
     
     @Override
     public void onSpatialUpdated(BlockChunkControl blockChunk){
-        Geometry optimizedGeometry;
-        MeshCollisionShape optimizedShape;
-        
-        Object[] results;
-        onSpatialUpdate optimized = new onSpatialUpdate();
-        Thread t = new Thread(optimized);
-        t.start();
-        results = optimized.getOptimized(blockChunk);
-        
-        optimizedGeometry = (Geometry)results[0];
-        optimizedShape = (MeshCollisionShape)results[1];
-        
+        Geometry optimizedGeometry = blockChunk.getOptimizedGeometry();
         RigidBodyControl rigidBodyControl = optimizedGeometry.getControl(RigidBodyControl.class);
         if(rigidBodyControl == null){
             rigidBodyControl = new RigidBodyControl(0);
             optimizedGeometry.addControl(rigidBodyControl);
             gamePhysics.getBulletAppState().getPhysicsSpace().add(rigidBodyControl);
         }
-        rigidBodyControl.setCollisionShape(optimizedShape);
+        rigidBodyControl.setCollisionShape(new MeshCollisionShape(blockChunk.getOptimizedGeometry().getMesh()));
     }
     
     public void onAction(String name, boolean isPressed, float tpf)
@@ -264,25 +324,5 @@ public class WorldGenerator implements BlockChunkListener
         if(gamePhysics.getCharacterControl().getPhysicsLocation().getY() < -50)
             below0();
         
-    }
-    
-    private static class onSpatialUpdate implements Runnable
-    {
-        private Object[] optimized;
-        
-        @Override
-        public void run()
-        {
-            
-        }
-        
-        public Object[] getOptimized(BlockChunkControl blockChunk)
-        {
-            optimized = new Object[2];
-            optimized[0] = blockChunk.getOptimizedGeometry();
-            optimized[1] = new MeshCollisionShape(((Geometry)optimized[0]).getMesh());
-            
-            return optimized;
-        }
     }
 }

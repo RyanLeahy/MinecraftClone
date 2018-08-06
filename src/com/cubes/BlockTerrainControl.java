@@ -155,10 +155,7 @@ public class BlockTerrainControl extends AbstractControl implements BitSerializa
         return null;
     }
     
-    public void removeChunk(Vector3Int blockLocation, BlockTerrainControl currentWorld)
-    {
-        removeBlockArea(currentWorld.getStart(blockLocation), new Vector3Int(16,256,16));
-    }
+    
     
     private boolean isValidChunkLocation(Vector3Int location){
         return Util.isValidIndex(chunks, location);
@@ -174,7 +171,7 @@ public class BlockTerrainControl extends AbstractControl implements BitSerializa
     }
     
     //basically same thing as above but this way I don't screw up any other code when i modify the above
-    private Vector3Int getStart(Vector3Int blockLocation)
+    public Vector3Int getStart(Vector3Int blockLocation)
     {
         Vector3Int chunkLocation = new Vector3Int();
         int chunkX = ((blockLocation.getX() + 1) / settings.getChunkSizeX()) * 16;
