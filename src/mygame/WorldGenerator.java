@@ -18,8 +18,10 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -84,6 +86,14 @@ public class WorldGenerator implements BlockChunkListener
         gamePhysics.getBulletAppState().getPhysicsSpace().addAll(terrainNode);
         myMain.getRootNode().attachChild(terrainNode);
         world.addChunkListener(this);
+        try
+        {
+            readChanges();
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
     }
     
     //pass int to where to generate the base of the tree
@@ -119,13 +129,83 @@ public class WorldGenerator implements BlockChunkListener
     //method will read the changes that was made to the world and will process it
     private void readChanges() throws IOException
     {
+        BufferedReader read;
+        String readData;
+        
+        if(worldFile.exists()) //if the file exists
+        {
+            read = new BufferedReader(new FileReader(worldFile)); //create a buffer reader
+            
+            do
+            {
+                readData = read.readLine();
+                processChanges(readData);
+            }
+            while(readData != null);
+            
+            read.close();
+        }
+    }
+    
+    //helper method for readChanges, receives a string of data and processes it and affects the world
+    private void processChanges(String data)
+    {
+        if(data == null) //incase there is nothing in the file
+            return;
+        
+        int index = -2; //used for space indexes
+        char type;
+        String manipulate;
+        String Mcoords[] = new String[3];
+        String MblockID = ""; //M for manipulate
+        
+        Vector3Int coord;
+        int blockID = 1; //stone incase this drastically fails for some reason
+        
+        /* Start the process of chopping up the data */
+        type= data.charAt(0); //grabs the type, like b or a for break or add
+        manipulate = data.substring(2); //leaves off the type and space
+        index = manipulate.indexOf(" ");
+        
+        Mcoords[0] = manipulate.substring(0, index); //gets coords
+        manipulate = manipulate.substring(index + 1); //substrings the rest of the string to leave out the space we just went through so "60 30 20 1" becomes "30 20 1"
+        index = manipulate.indexOf(" ");
+        Mcoords[1] = manipulate.substring(0, index); //gets coords
+        manipulate = manipulate.substring(index + 1); //substrings the rest of the string to leave out the space we just went through so "60 30 20 1" becomes "30 20 1"
+        index = manipulate.indexOf(" ");
+        
+        if(index == -1)
+            Mcoords[2] = manipulate.substring(0); //gets coords
+        else
+            Mcoords[2] = manipulate.substring(0, index); //gets coords
+        
+        manipulate = manipulate.substring(index + 1); //substrings the rest of the string to leave out the space we just went through so "60 30 20 1" becomes "30 20 1"
+        
+        if(type == 'a')
+        {
+            index = manipulate.indexOf(" ");
+            MblockID = manipulate.substring(index + 1);
+        }
+        /* End the process of chopping up the data and start the process of converting it to its correct data type */
+        
+        coord = new Vector3Int(Integer.parseInt(Mcoords[0]), Integer.parseInt(Mcoords[1]), Integer.parseInt(Mcoords[2])); //converts the string representation of the data into an actual coordinate
+        
+        if(type == 'a')
+            blockID = Integer.parseInt(MblockID);
+        
+        /* End the process of converting and start the process of actually changing something */
+        
+        if(type == 'a')
+            world.setBlock(coord, myDatabase.createBlock(blockID));
+        else
+            world.removeBlock(coord);
         
     }
     
     //method will write the changes to the world to a file
     private void writeChanges(String type, Vector3Int coords, int blockID) throws IOException
     {
-        BufferedWriter data;
+        FileWriter data;
         String rawData;
         
         if(blockID == -1) //if the blockID is -1 that means that there is no actual blockID and should not be in the file
@@ -136,9 +216,8 @@ public class WorldGenerator implements BlockChunkListener
         if(worldFile.exists() == false) //if there is no file create one
             worldFile.createNewFile();
         
-        data = new BufferedWriter(new FileWriter(worldFile));
-        data.append(type);
-        data.newLine();
+        data = new FileWriter(worldFile, true);
+        data.write(rawData + "\n");
         data.close();
     }
     
@@ -251,7 +330,6 @@ public class WorldGenerator implements BlockChunkListener
         if(collisionResults.getClosestCollision() != null/* && collisionResults.getClosestCollision().getDistance() < 5*/) //add conditioning, first makes sure there is something to break, second makes sure its not too far
         {
             currentID = myDatabase.searchDatabase(world.getBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), false)));
-            removeChunk(new Vector3Int(collisionResults.getClosestCollision().getContactPoint()));
         }
     }
     
@@ -264,12 +342,6 @@ public class WorldGenerator implements BlockChunkListener
     public void addBlock(Vector3Int coordinates, int id)
     {
         world.setBlock(coordinates, myDatabase.createBlock(id));
-    }
-    
-    public void removeChunk(Vector3Int blockLocation)
-    {
-        if(blockLocation != null)
-            world.removeBlockArea(world.getStart(blockLocation), new Vector3Int(myDatabase.getSettings().getChunkSizeX(),256,myDatabase.getSettings().getChunkSizeZ()));
     }
     
     /*private boolean delay(float tpf) //deprecated for now
