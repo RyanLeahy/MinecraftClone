@@ -268,13 +268,16 @@ public class WorldGenerator implements BlockChunkListener
     {
         Ray ray = new Ray(gameCam.getLocation(), gameCam.getDirection());
         terrainNode.collideWith(ray, collisionResults);
+        Vector3Int coords; //store the coords for the method since for some reason it changes while the call to the method is still alive
+        
         if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
         {
-            world.removeBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), false)); //false value returns the coordinates of the block, true returns the coordinates of where the neighbor would be
+            coords = BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), false);
+            world.removeBlock(coords); //false value returns the coordinates of the block, true returns the coordinates of where the neighbor would be
             
             try
             {
-                writeChanges("b", BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), false), -1);
+                writeChanges("b", coords, -1);
             }
             catch(IOException e)
             {
@@ -287,15 +290,18 @@ public class WorldGenerator implements BlockChunkListener
     {
         Ray ray = new Ray(gameCam.getLocation(), gameCam.getDirection());
         terrainNode.collideWith(ray, collisionResults);
+        Vector3Int coords; //store the coords for the method since for some reason it changes while the call to the method is still alive
+        
         if(collisionResults.getClosestCollision() != null && collisionResults.getClosestCollision().getDistance() < 5) //add conditioning, first makes sure there is something to break, second makes sure its not too far
         {
             if (currentID != -1) //if the search didn't fail use that block
             {
-                world.setBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true), myDatabase.createBlock(currentID));
+                coords = BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true);
+                world.setBlock(coords, myDatabase.createBlock(currentID));
                 
                 try
                 {
-                    writeChanges("a", BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true), currentID);
+                    writeChanges("a", coords, currentID);
                 }
                 catch(IOException e)
                 {
@@ -304,11 +310,12 @@ public class WorldGenerator implements BlockChunkListener
             }
             else //otherwise use stone
             {
-                world.setBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true), myDatabase.createBlock(1)); 
+                coords = BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true);
+                world.setBlock(coords, myDatabase.createBlock(1)); 
                 
                 try
                 {
-                    writeChanges("a", BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), true), 1);
+                    writeChanges("a", coords, 1);
                 }
                 catch(IOException e)
                 {
@@ -331,17 +338,6 @@ public class WorldGenerator implements BlockChunkListener
         {
             currentID = myDatabase.searchDatabase(world.getBlock(BlockNavigator.getPointedBlockLocation(world, collisionResults.getClosestCollision().getContactPoint(), false)));
         }
-    }
-    
-    /**
-     * Method adds a block at a given coordinate
-     * 
-     * @param coordinates
-     * @param id
-     */
-    public void addBlock(Vector3Int coordinates, int id)
-    {
-        world.setBlock(coordinates, myDatabase.createBlock(id));
     }
     
     /*private boolean delay(float tpf) //deprecated for now
